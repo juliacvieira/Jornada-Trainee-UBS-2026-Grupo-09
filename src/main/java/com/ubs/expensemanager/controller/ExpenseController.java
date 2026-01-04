@@ -24,7 +24,7 @@ public class ExpenseController {
 
     @GetMapping
     public List<Expense> getExpenses(){
-        return service.allExpenses();
+        return service.findAll();
     }
 
     @GetMapping("/expense/{id}")
