@@ -1,11 +1,15 @@
 package com.ubs.expensemanager.service;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
 import com.ubs.expensemanager.domain.Expense;
 import com.ubs.expensemanager.domain.enums.ExpenseStatus;
+import com.ubs.expensemanager.dto.CreateExpenseRequest;
+import com.ubs.expensemanager.dto.UpdateExpenseRequest;
 import com.ubs.expensemanager.repository.ExpenseRepository;
 
 @Service
@@ -17,18 +21,45 @@ public class ExpenseService {
         this.repository = repository;
     }
 
-    public Expense createExpense (Expense expense){
-        validateExpense(expense);
+    public Expense createExpense (CreateExpenseRequest request){
+        Expense expense = new Expense();
+
+        expense.setAmount(request.getAmount());
+        expense.setCategory(request.getCategory());
+        expense.setDate(request.getDate());
+        expense.setCurrency(request.getCurrency());
+        expense.setEmployee(request.getEmployee());
+
+        boolean valid = validateExpense(expense);
+
+        if (valid == true) {
+            Expense saved = repository.save(expense);
+            return saved;
+        }
+
         return expense;
+
+    }
+
+    public Expense updateExpense (UUID id, UpdateExpenseRequest request){
+        expense = findById(id);
+
+        
     }
 
     public List<Expense> findAll(){
         return repository.findAll();
     }
 
-    private void validateExpense (Expense expense){
+    public Optional<Expense> findById(UUID id){
+        return repository.findById(id);
+    }
+
+    private boolean validateExpense (Expense expense){
         //validacao - work in progress
 
         expense.setStatus(ExpenseStatus.PENDING);
+
+        return true;
     }
 }
