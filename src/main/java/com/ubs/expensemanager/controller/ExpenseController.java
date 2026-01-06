@@ -15,16 +15,20 @@ import org.springframework.web.bind.annotation.RestController;
 import com.ubs.expensemanager.service.ExpenseService;
 import com.ubs.expensemanager.domain.Expense;
 import com.ubs.expensemanager.dto.CreateExpenseRequest;
+import com.ubs.expensemanager.dto.ExpenseResponse;
 import com.ubs.expensemanager.dto.UpdateExpenseRequest;
+import com.ubs.expensemanager.mapper.ExpenseMapper;
 
 @RestController
 @RequestMapping("/expense")
 public class ExpenseController {
 
     private final ExpenseService service;
+    private final ExpenseMapper mapper;
 
-    public ExpenseController(ExpenseService service){
+    public ExpenseController(ExpenseService service, ExpenseMapper mapper){
         this.service = service;
+        this.mapper = mapper;
     }
 
     @GetMapping
@@ -38,8 +42,9 @@ public class ExpenseController {
     }
 
     @PostMapping
-    public Expense newExpense(@RequestBody CreateExpenseRequest request){
-        return service.createExpense(request);
+    public ExpenseResponse newExpense(@RequestBody CreateExpenseRequest request){
+        Expense expense = service.createExpense(request);
+        return mapper.toResponse(expense);
     }
 
     @PatchMapping("/{id}")

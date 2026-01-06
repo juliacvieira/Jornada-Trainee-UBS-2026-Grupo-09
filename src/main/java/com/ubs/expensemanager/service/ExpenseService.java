@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import com.ubs.expensemanager.domain.Expense;
 import com.ubs.expensemanager.domain.enums.ExpenseStatus;
 import com.ubs.expensemanager.dto.CreateExpenseRequest;
+import com.ubs.expensemanager.dto.ExpenseResponse;
 import com.ubs.expensemanager.dto.UpdateExpenseRequest;
 import com.ubs.expensemanager.repository.ExpenseRepository;
 
@@ -32,9 +33,13 @@ public class ExpenseService {
 
         boolean valid = validateExpense(expense);
 
-        if (valid == true) {
+        try {
+            if (valid == true) {
             Expense saved = repository.save(expense);
             return saved;
+        }
+        } catch (Exception e) {
+            System.out.println("Validation exception: " + e);
         }
 
         return expense;
