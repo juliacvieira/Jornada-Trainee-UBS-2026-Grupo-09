@@ -25,11 +25,11 @@ public class ExpenseService {
     public Expense createExpense (CreateExpenseRequest request){
         Expense expense = new Expense();
 
-        expense.setAmount(request.getAmount());
-        expense.setCategory(request.getCategory());
-        expense.setDate(request.getDate());
-        expense.setCurrency(request.getCurrency());
-        expense.setEmployee(request.getEmployee());
+        expense.setAmount(request.amount());
+        expense.setCategory(request.category());
+        expense.setDate(request.date());
+        expense.setCurrency(request.currency());
+        expense.setEmployee(request.employee());
 
         boolean valid = validateExpense(expense);
 
