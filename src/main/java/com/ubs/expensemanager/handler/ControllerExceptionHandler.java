@@ -1,4 +1,4 @@
-package com.ubs.expensemanager;
+package com.ubs.expensemanager.handler;
 
 import java.util.NoSuchElementException;
 

@@ -32,13 +32,15 @@ public class ExpenseController {
     }
 
     @GetMapping
-    public List<Expense> getExpenses(){
-        return service.findAll();
+    public List<ExpenseResponse> getExpenses(){
+        Expense expense = service.findAll();
+        return mapper.toResponse(expense);
     }
 
     @GetMapping("/{id}")
-    public Optional<Expense> getExpensesById(@PathVariable UUID id){
-        return service.findById(id);
+    public Optional<ExpenseResponse> getExpensesById(@PathVariable UUID id){
+        Expense expense =  service.findById(id);
+        return mapper.toResponse(expense);
     }
 
     @PostMapping
@@ -48,7 +50,8 @@ public class ExpenseController {
     }
 
     @PatchMapping("/{id}")
-    public Expense updateExpense(@PathVariable UUID id, @RequestBody UpdateExpenseRequest request){
-        return service.updateExpense(id, request);
+    public ExpenseResponse updateExpense(@PathVariable UUID id, @RequestBody UpdateExpenseRequest request){
+        Expense expense = service.updateExpense(id, request);
+        return mapper.toResponse(expense);
     }
 }

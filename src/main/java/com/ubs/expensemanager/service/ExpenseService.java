@@ -1,6 +1,7 @@
 package com.ubs.expensemanager.service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -11,6 +12,7 @@ import com.ubs.expensemanager.domain.enums.ExpenseStatus;
 import com.ubs.expensemanager.dto.CreateExpenseRequest;
 import com.ubs.expensemanager.dto.ExpenseResponse;
 import com.ubs.expensemanager.dto.UpdateExpenseRequest;
+import com.ubs.expensemanager.handler.ControllerExceptionHandler;
 import com.ubs.expensemanager.repository.ExpenseRepository;
 
 @Service
@@ -56,8 +58,9 @@ public class ExpenseService {
         return repository.findAll();
     }
 
-    public Optional<Expense> findById(UUID id){
-        return repository.findById(id);
+    public Expense findById(UUID id){
+        return repository.findById(id)
+        .orElseThrow(() -> new NoSuchElementException("Expense" + id + "not found"));
     }
 
     private boolean validateExpense (Expense expense){
