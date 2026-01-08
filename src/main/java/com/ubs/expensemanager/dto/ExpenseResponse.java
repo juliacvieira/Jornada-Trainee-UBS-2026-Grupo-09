@@ -11,7 +11,8 @@ public record ExpenseResponse(UUID id,
                             BigDecimal amount, 
                             String currency, 
                             LocalDate date, 
-                            ExpenseStatus status) 
+                            ExpenseStatus status,
+                            String description) 
 {}
 
     

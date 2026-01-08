@@ -1,7 +1,6 @@
 package com.ubs.expensemanager.controller;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -33,12 +32,12 @@ public class ExpenseController {
 
     @GetMapping
     public List<ExpenseResponse> getExpenses(){
-        Expense expense = service.findAll();
-        return mapper.toResponse(expense);
+        List<Expense> expenses = service.findAll();
+        return mapper.toResponseList(expenses);
     }
 
     @GetMapping("/{id}")
-    public Optional<ExpenseResponse> getExpensesById(@PathVariable UUID id){
+    public ExpenseResponse getExpensesById(@PathVariable UUID id){
         Expense expense =  service.findById(id);
         return mapper.toResponse(expense);
     }

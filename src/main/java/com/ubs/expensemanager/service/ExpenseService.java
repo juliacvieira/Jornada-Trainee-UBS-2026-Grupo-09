@@ -2,7 +2,6 @@ package com.ubs.expensemanager.service;
 
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -10,9 +9,7 @@ import org.springframework.stereotype.Service;
 import com.ubs.expensemanager.domain.Expense;
 import com.ubs.expensemanager.domain.enums.ExpenseStatus;
 import com.ubs.expensemanager.dto.CreateExpenseRequest;
-import com.ubs.expensemanager.dto.ExpenseResponse;
 import com.ubs.expensemanager.dto.UpdateExpenseRequest;
-import com.ubs.expensemanager.handler.ControllerExceptionHandler;
 import com.ubs.expensemanager.repository.ExpenseRepository;
 
 @Service
@@ -32,6 +29,7 @@ public class ExpenseService {
         expense.setDate(request.date());
         expense.setCurrency(request.currency());
         expense.setEmployee(request.employee());
+        expense.setDescription(request.description());
 
         boolean valid = validateExpense(expense);
 
@@ -49,7 +47,16 @@ public class ExpenseService {
     }
 
     public Expense updateExpense (UUID id, UpdateExpenseRequest request){
-        expense = findById(id);
+        Expense expense = findById(id);
+
+        expense.setAmount(request.amount());
+        expense.setCategory(request.category());
+        expense.setCurrency(request.currency());
+        expense.setDate(request.date());
+        expense.setDescription(request.description());
+
+        return expense;
+
 
         
     }

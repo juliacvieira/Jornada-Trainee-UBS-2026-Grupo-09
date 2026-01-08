@@ -10,5 +10,6 @@ public record CreateExpenseRequest(Employee employee,
                                     Category category,
                                     BigDecimal amount,
                                     String currency,
-                                    LocalDate date) 
+                                    LocalDate date,
+                                    String description) 
 {}

@@ -1,5 +1,7 @@
 package com.ubs.expensemanager.mapper;
 
+import java.util.List;
+
 import org.springframework.stereotype.Component;
 
 import com.ubs.expensemanager.domain.Expense;
@@ -15,8 +17,15 @@ public class ExpenseMapper {
             expense.getAmount(),
             expense.getCurrency(),
             expense.getDate(),
-            expense.getStatus()
+            expense.getStatus(),
+            expense.getDescription()
         );
+    }
+
+    public List<ExpenseResponse> toResponseList (List<Expense> expenses){
+        return expenses.stream()
+                .map(expense -> toResponse(expense))
+                .toList();
     }
 
 }
