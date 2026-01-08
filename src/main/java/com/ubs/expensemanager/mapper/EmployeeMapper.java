@@ -2,14 +2,15 @@ package com.ubs.expensemanager.mapper;
 
 import java.util.List;
 
-import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Component;
 
 import com.ubs.expensemanager.domain.Employee;
 import com.ubs.expensemanager.dto.EmployeeResponse;
 
-@Controller
+@Component
 public class EmployeeMapper {
-public EmployeeResponse toResponse (Employee employee){
+    
+    public EmployeeResponse toResponse (Employee employee){
         return new EmployeeResponse(
             employee.getId(),
             employee.getName(),
