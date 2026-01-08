@@ -11,7 +11,7 @@ public class EmployeeController {
 
     @GetMapping
     public String getEmployee(){
-        return "teste";
+        return "teste"; 
     }
 
     @PostMapping
