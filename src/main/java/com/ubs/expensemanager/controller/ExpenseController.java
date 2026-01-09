@@ -13,9 +13,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ubs.expensemanager.service.ExpenseService;
 import com.ubs.expensemanager.domain.Expense;
-import com.ubs.expensemanager.dto.CreateExpenseRequest;
-import com.ubs.expensemanager.dto.ExpenseResponse;
-import com.ubs.expensemanager.dto.UpdateExpenseRequest;
+import com.ubs.expensemanager.dto.expense.CreateExpenseRequest;
+import com.ubs.expensemanager.dto.expense.ExpenseResponse;
+import com.ubs.expensemanager.dto.expense.UpdateExpenseRequest;
 import com.ubs.expensemanager.mapper.ExpenseMapper;
 
 @RestController

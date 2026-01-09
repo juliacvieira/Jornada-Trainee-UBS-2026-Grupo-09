@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ubs.expensemanager.domain.Category;
-import com.ubs.expensemanager.dto.CategoryResponse;
-import com.ubs.expensemanager.dto.CreateCategoryRequest;
-import com.ubs.expensemanager.dto.UpdateCategoryRequest;
+import com.ubs.expensemanager.dto.category.CategoryResponse;
+import com.ubs.expensemanager.dto.category.CreateCategoryRequest;
+import com.ubs.expensemanager.dto.category.UpdateCategoryRequest;
 import com.ubs.expensemanager.mapper.CategoryMapper;
 import com.ubs.expensemanager.service.CategoryService;
 

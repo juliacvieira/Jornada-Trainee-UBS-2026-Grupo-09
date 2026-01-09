@@ -1,4 +1,4 @@
-package com.ubs.expensemanager.dto;
+package com.ubs.expensemanager.dto.expense;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

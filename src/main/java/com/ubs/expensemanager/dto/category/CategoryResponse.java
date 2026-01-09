@@ -1,4 +1,4 @@
-package com.ubs.expensemanager.dto;
+package com.ubs.expensemanager.dto.category;
 
 import java.math.BigDecimal;
 import java.util.UUID;

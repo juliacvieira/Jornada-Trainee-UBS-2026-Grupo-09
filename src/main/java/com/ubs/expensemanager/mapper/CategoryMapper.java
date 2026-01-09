@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.ubs.expensemanager.domain.Category;
-import com.ubs.expensemanager.dto.CategoryResponse;
+import com.ubs.expensemanager.dto.category.CategoryResponse;
 
 @Component
 public class CategoryMapper {

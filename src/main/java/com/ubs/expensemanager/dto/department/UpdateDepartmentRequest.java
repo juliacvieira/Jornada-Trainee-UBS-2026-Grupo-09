@@ -1,4 +1,4 @@
-package com.ubs.expensemanager.dto;
+package com.ubs.expensemanager.dto.department;
 
 import java.math.BigDecimal;
 

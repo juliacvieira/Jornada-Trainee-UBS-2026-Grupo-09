@@ -7,8 +7,8 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 
 import com.ubs.expensemanager.domain.Category;
-import com.ubs.expensemanager.dto.CreateCategoryRequest;
-import com.ubs.expensemanager.dto.UpdateCategoryRequest;
+import com.ubs.expensemanager.dto.category.CreateCategoryRequest;
+import com.ubs.expensemanager.dto.category.UpdateCategoryRequest;
 import com.ubs.expensemanager.repository.CategoryRepository;
 
 @Service

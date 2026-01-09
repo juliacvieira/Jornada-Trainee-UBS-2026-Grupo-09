@@ -7,8 +7,8 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 
 import com.ubs.expensemanager.domain.Department;
-import com.ubs.expensemanager.dto.CreateDepartmentRequest;
-import com.ubs.expensemanager.dto.UpdateDepartmentRequest;
+import com.ubs.expensemanager.dto.department.CreateDepartmentRequest;
+import com.ubs.expensemanager.dto.department.UpdateDepartmentRequest;
 import com.ubs.expensemanager.repository.DepartmentRepository;
 
 @Service

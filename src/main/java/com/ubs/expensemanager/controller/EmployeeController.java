@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ubs.expensemanager.domain.Employee;
-import com.ubs.expensemanager.dto.CreateEmployeeRequest;
-import com.ubs.expensemanager.dto.EmployeeResponse;
-import com.ubs.expensemanager.dto.UpdateEmployeeRequest;
+import com.ubs.expensemanager.dto.employee.CreateEmployeeRequest;
+import com.ubs.expensemanager.dto.employee.EmployeeResponse;
+import com.ubs.expensemanager.dto.employee.UpdateEmployeeRequest;
 import com.ubs.expensemanager.mapper.EmployeeMapper;
 import com.ubs.expensemanager.service.EmployeeService;
 

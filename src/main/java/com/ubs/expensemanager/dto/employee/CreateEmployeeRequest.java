@@ -1,4 +1,4 @@
-package com.ubs.expensemanager.dto;
+package com.ubs.expensemanager.dto.employee;
 
 import com.ubs.expensemanager.domain.Department;
 import com.ubs.expensemanager.domain.Employee;

@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.ubs.expensemanager.domain.Department;
-import com.ubs.expensemanager.dto.DepartmentResponse;
+import com.ubs.expensemanager.dto.department.DepartmentResponse;
 
 @Component
 public class DepartmentMapper {

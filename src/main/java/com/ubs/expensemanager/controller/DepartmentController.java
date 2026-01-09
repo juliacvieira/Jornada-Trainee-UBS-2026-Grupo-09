@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ubs.expensemanager.domain.Department;
-import com.ubs.expensemanager.dto.CreateDepartmentRequest;
-import com.ubs.expensemanager.dto.DepartmentResponse;
-import com.ubs.expensemanager.dto.UpdateDepartmentRequest;
+import com.ubs.expensemanager.dto.department.CreateDepartmentRequest;
+import com.ubs.expensemanager.dto.department.DepartmentResponse;
+import com.ubs.expensemanager.dto.department.UpdateDepartmentRequest;
 import com.ubs.expensemanager.mapper.DepartmentMapper;
 import com.ubs.expensemanager.service.DepartmentService;
 

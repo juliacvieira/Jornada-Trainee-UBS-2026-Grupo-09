@@ -8,8 +8,8 @@ import org.springframework.stereotype.Service;
 
 import com.ubs.expensemanager.domain.Expense;
 import com.ubs.expensemanager.domain.enums.ExpenseStatus;
-import com.ubs.expensemanager.dto.CreateExpenseRequest;
-import com.ubs.expensemanager.dto.UpdateExpenseRequest;
+import com.ubs.expensemanager.dto.expense.CreateExpenseRequest;
+import com.ubs.expensemanager.dto.expense.UpdateExpenseRequest;
 import com.ubs.expensemanager.repository.ExpenseRepository;
 
 @Service

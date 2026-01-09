@@ -7,8 +7,8 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 
 import com.ubs.expensemanager.domain.Employee;
-import com.ubs.expensemanager.dto.CreateEmployeeRequest;
-import com.ubs.expensemanager.dto.UpdateEmployeeRequest;
+import com.ubs.expensemanager.dto.employee.CreateEmployeeRequest;
+import com.ubs.expensemanager.dto.employee.UpdateEmployeeRequest;
 import com.ubs.expensemanager.repository.EmployeeRepository;
 
 @Service

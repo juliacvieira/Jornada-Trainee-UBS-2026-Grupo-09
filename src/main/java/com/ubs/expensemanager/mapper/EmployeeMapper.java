@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.ubs.expensemanager.domain.Employee;
-import com.ubs.expensemanager.dto.EmployeeResponse;
+import com.ubs.expensemanager.dto.employee.EmployeeResponse;
 
 @Component
 public class EmployeeMapper {

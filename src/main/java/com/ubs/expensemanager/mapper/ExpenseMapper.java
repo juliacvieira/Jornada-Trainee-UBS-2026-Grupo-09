@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.ubs.expensemanager.domain.Expense;
-import com.ubs.expensemanager.dto.ExpenseResponse;
+import com.ubs.expensemanager.dto.expense.ExpenseResponse;
 
 @Component
 public class ExpenseMapper {
