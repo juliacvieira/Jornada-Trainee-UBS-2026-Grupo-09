@@ -10,13 +10,13 @@ import com.ubs.expensemanager.dto.category.CategoryResponse;
 @Component
 public class CategoryMapper {
 
-    public CategoryResponse toResponse (Category category){
+	public static CategoryResponse toResponse(Category c) {
         return new CategoryResponse(
-            category.getId(),
-            category.getName(),
-            category.getDailyLimit(),
-            category.getMonthlyLimit()
-        );
+        		c.getId(),
+        		c.getName(),
+        		c.getDailyLimit(),
+        		c.getMonthlyLimit()
+    		);
     }
 
     public List<CategoryResponse> toResponseList (List<Category> categorys){
