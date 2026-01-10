@@ -6,27 +6,34 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
+import com.ubs.expensemanager.domain.Department;
 import com.ubs.expensemanager.domain.Employee;
 import com.ubs.expensemanager.dto.employee.CreateEmployeeRequest;
 import com.ubs.expensemanager.dto.employee.UpdateEmployeeRequest;
+import com.ubs.expensemanager.repository.DepartmentRepository;
 import com.ubs.expensemanager.repository.EmployeeRepository;
 
 @Service
 public class EmployeeService {
 
     private final EmployeeRepository repository;
+    private final DepartmentRepository departmentRepository;
 
-    public EmployeeService(EmployeeRepository repository){
+    public EmployeeService(EmployeeRepository repository, DepartmentRepository departmentRepository){
         this.repository = repository;
+        this.departmentRepository = departmentRepository;
     }
 
     public Employee createEmployee (CreateEmployeeRequest request){
         Employee employee = new Employee();
 
+        Employee manager = repository.findByName(request.manager()).orElseThrow(() -> new NoSuchElementException("Manager " + request.manager() + " not found"));
+        Department department = departmentRepository.findByName(request.department()).orElseThrow(() -> new NoSuchElementException("Department" + request.department() + "not found"));
+
         employee.setName(request.name());
-        employee.setDepartment(request.department());
+        employee.setDepartment(department);
         employee.setEmail(request.email());
-        employee.setManager(request.manager());
+        employee.setManager(manager);
         employee.setPosition(request.position());
 
         boolean valid = validateEmployee(employee);

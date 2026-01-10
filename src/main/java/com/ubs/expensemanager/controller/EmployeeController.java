@@ -31,7 +31,7 @@ public class EmployeeController {
         this.mapper = mapper;
     }
 
-    @GetMapping("path")
+    @GetMapping
     public List <EmployeeResponse> getEmployees() {
         List<Employee> employees = service.findAll();
         return mapper.toResponseList(employees);

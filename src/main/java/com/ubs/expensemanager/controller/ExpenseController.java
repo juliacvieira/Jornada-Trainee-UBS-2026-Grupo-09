@@ -3,6 +3,7 @@ package com.ubs.expensemanager.controller;
 import java.util.List;
 import java.util.UUID;
 
+//import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -22,7 +23,9 @@ import com.ubs.expensemanager.mapper.ExpenseMapper;
 @RequestMapping("/expense")
 public class ExpenseController {
 
+    //@Autowired
     private final ExpenseService service;
+    //@Autowired
     private final ExpenseMapper mapper;
 
     public ExpenseController(ExpenseService service, ExpenseMapper mapper){
