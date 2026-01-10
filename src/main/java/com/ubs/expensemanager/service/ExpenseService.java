@@ -1,11 +1,15 @@
 package com.ubs.expensemanager.service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
+import com.ubs.expensemanager.domain.Category;
+import com.ubs.expensemanager.domain.Department;
+import com.ubs.expensemanager.domain.Employee;
 import com.ubs.expensemanager.domain.Expense;
 import com.ubs.expensemanager.domain.enums.ExpenseStatus;
 import com.ubs.expensemanager.dto.expense.CreateExpenseRequest;
@@ -30,20 +34,13 @@ public class ExpenseService {
         expense.setCurrency(request.currency());
         expense.setEmployee(request.employee());
         expense.setDescription(request.description());
+        expense.setStatus(ExpenseStatus.PENDING);
 
-        boolean valid = validateExpense(expense);
 
-        try {
-            if (valid == true) {
-            Expense saved = repository.save(expense);
-            return saved;
-        }
-        } catch (Exception e) {
-            System.out.println("Validation exception: " + e);
-        }
+        validateExpense(expense);
 
-        return expense;
-
+        Expense saved = repository.save(expense);
+        return saved;
     }
 
     public Expense updateExpense (UUID id, UpdateExpenseRequest request){
@@ -55,10 +52,7 @@ public class ExpenseService {
         expense.setDate(request.date());
         expense.setDescription(request.description());
 
-        return expense;
-
-
-        
+        return expense;        
     }
 
     public List<Expense> findAll(){
@@ -70,11 +64,25 @@ public class ExpenseService {
         .orElseThrow(() -> new NoSuchElementException("Expense" + id + "not found"));
     }
 
-    private boolean validateExpense (Expense expense){
+    private void validateExpense (Expense expense){
         //validacao - work in progress
+        Employee employee = expense.getEmployee();
+        Department department = employee.getDepartment();
+        Category category = expense.getCategory();
+        
+        BigDecimal budget = department.getMonthlyBudget();
+        BigDecimal dailyLimit = category.getDailyLimit();
+        BigDecimal monthlyLimit = category.getMonthlyLimit();
+        BigDecimal amount = expense.getAmount();
 
-        expense.setStatus(ExpenseStatus.PENDING);
-
-        return true;
+        if (amount.compareTo(budget) < 0){
+            throw new RuntimeException ("Limit surpassed");
+        }
+        if (amount.compareTo(dailyLimit) < 0){
+            throw new RuntimeException ("Limit surpassed");
+        }
+        if (amount.compareTo(monthlyLimit) < 0){
+            throw new RuntimeException ("Limit surpassed");
+        }
     }
 }
