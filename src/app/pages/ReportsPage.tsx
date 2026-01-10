@@ -10,11 +10,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../components/ui/select';
-import type { TranslationKeys } from '../translations';
+import type { TranslationKeys, Language } from '../translations';
 import { useAuth } from '../hooks/useAuth';
 
 interface ReportsPageProps {
   t: TranslationKeys;
+  language: Language;
 }
 
 // Mock data for charts - switch for real data integration
@@ -28,51 +29,26 @@ const expensesByCategory = [
 // Budget data with spent vs remaining percentages
 const budgetLimit = 150000; // Total budget limit
 const budgetData = [
-  { 
-    month: 'Jul', 
-    spent: 15000, 
-    remaining: budgetLimit - 15000,
-    spentPercent: (15000 / budgetLimit) * 100,
-    remainingPercent: ((budgetLimit - 15000) / budgetLimit) * 100
-  },
-  { 
-    month: 'Ago', 
-    spent: 18500, 
-    remaining: budgetLimit - 18500,
-    spentPercent: (18500 / budgetLimit) * 100,
-    remainingPercent: ((budgetLimit - 18500) / budgetLimit) * 100
-  },
-  { 
-    month: 'Set', 
-    spent: 16200, 
-    remaining: budgetLimit - 16200,
-    spentPercent: (16200 / budgetLimit) * 100,
-    remainingPercent: ((budgetLimit - 16200) / budgetLimit) * 100
-  },
-  { 
-    month: 'Out', 
-    spent: 19800, 
-    remaining: budgetLimit - 19800,
-    spentPercent: (19800 / budgetLimit) * 100,
-    remainingPercent: ((budgetLimit - 19800) / budgetLimit) * 100
-  },
-  { 
-    month: 'Nov', 
-    spent: 21500, 
-    remaining: budgetLimit - 21500,
-    spentPercent: (21500 / budgetLimit) * 100,
-    remainingPercent: ((budgetLimit - 21500) / budgetLimit) * 100
-  },
-  { 
-    month: 'Dez', 
-    spent: 20700, 
-    remaining: budgetLimit - 20700,
-    spentPercent: (20700 / budgetLimit) * 100,
-    remainingPercent: ((budgetLimit - 20700) / budgetLimit) * 100
-  },
-];
+  { monthIndex: 1, spent: 12000 },
+  { monthIndex: 2, spent: 14000 },
+  { monthIndex: 3, spent: 11000 },
+  { monthIndex: 4, spent: 16000 },
+  { monthIndex: 5, spent: 18000 },
+  { monthIndex: 6, spent: 17500 },
+  { monthIndex: 7, spent: 15000 },
+  { monthIndex: 8, spent: 18500 },
+  { monthIndex: 9, spent: 16200 },
+  { monthIndex: 10, spent: 19800 },
+  { monthIndex: 11, spent: 21500 },
+  { monthIndex: 12, spent: 20700 },
+].map(d => ({
+  ...d,
+  remaining: budgetLimit - d.spent,
+  spentPercent: (d.spent / budgetLimit) * 100,
+  remainingPercent: ((budgetLimit - d.spent) / budgetLimit) * 100,
+}));
 
-const departmentData = [
+const departmentData: { department: string; expenses: number; employees: number }[] = [
   { department: 'IT', expenses: 28500, employees: 45 },
   { department: 'Sales', expenses: 35200, employees: 62 },
   { department: 'Marketing', expenses: 22100, employees: 28 },
@@ -104,29 +80,7 @@ interface CustomTooltipProps {
   }>;
 }
 
-// Custom tooltip for budget chart
-const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
-  if (active && payload && payload.length) {
-    const data = payload[0].payload;
-    return (
-      <div className="bg-white p-4 border border-gray-200 rounded shadow-lg">
-        <p className="font-semibold mb-2">{data.month}</p>
-        <p className="text-sm text-gray-700">
-          <span className="text-[#E60000]">● Approved expenses:</span> USD {data.spent.toLocaleString()}
-        </p>
-        <p className="text-sm text-gray-700">
-          <span className="text-[#10B981]">● Remaining budget:</span> USD {data.remaining.toLocaleString()}
-        </p>
-        <p className="text-sm text-gray-500 mt-1">
-          Total: USD {budgetLimit.toLocaleString()}
-        </p>
-      </div>
-    );
-  }
-  return null;
-};
-
-export function ReportsPage({ t }: ReportsPageProps) {
+export function ReportsPage({ t, language }: ReportsPageProps) {
   const { user } = useAuth();
   const [selectedPeriod, setSelectedPeriod] = useState('month');
   const [selectedDepartment, setSelectedDepartment] = useState('all');
@@ -134,6 +88,56 @@ export function ReportsPage({ t }: ReportsPageProps) {
   const [selectedMonth, setSelectedMonth] = useState('all');
 
   if (!user) return null;
+
+  // Localize months for budget chart (all 12 months)
+  const monthKeys = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'] as const;
+
+  const budgetDataLocalized = budgetData.map((d) => ({
+    ...d,
+    month: t.reports.months[monthKeys[(d.monthIndex || 1) - 1] as keyof typeof t.reports.months],
+  }));
+
+  // Map expense category names to translations
+  const categoryKeyMap: Record<string, keyof typeof t.expenses.categories> = {
+    Travel: 'travel',
+    Meal: 'meal',
+    Transport: 'transport',
+    Others: 'other',
+  };
+
+  const expensesByCategoryLocalized = expensesByCategory.map((e) => ({
+    ...e,
+    name: t.expenses.categories[categoryKeyMap[e.name] ?? 'other'] ?? e.name,
+  }));
+
+  // Translate top spenders' department labels for CSV/display
+  const deptKeyForTop: Record<string, keyof typeof t.employees.departments> = {
+    Sales: 'sales',
+    IT: 'it',
+    Marketing: 'marketing',
+    HR: 'hr',
+    Financial: 'finance',
+  };
+
+  // Translate department labels for X axis
+  const departmentKeyMap: Record<string, keyof typeof t.employees.departments> = {
+    IT: 'it',
+    Sales: 'sales',
+    Marketing: 'marketing',
+    HR: 'hr',
+    Financial: 'finance',
+  };
+
+  const topSpendersLocalized = topSpenders.map(s => ({
+    ...s,
+    department: t.employees.departments[departmentKeyMap[s.department] ?? ''],
+  }));
+
+
+  const departmentDataLocalized = departmentData.map((d: { department: string; expenses: number; employees: number }) => ({
+    ...d,
+    department: t.employees.departments[departmentKeyMap[d.department] ?? 'it'],
+  }));
 
   const statsCards = [
     {
@@ -170,6 +174,99 @@ export function ReportsPage({ t }: ReportsPageProps) {
     },
   ];
 
+  const locale = language === 'pt' ? 'pt-BR' : 'en-US';
+
+  const CustomTooltip = ({ active, payload }: CustomTooltipProps) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        <div className="bg-white p-4 border border-gray-200 rounded shadow-lg">
+          <p className="font-semibold mb-2">{data.month}</p>
+          <p className="text-sm text-gray-700">
+            <span className="text-[#E60000]">● {t.reports.approvedExpensesPercent.replace(' (%)', '')}:</span> USD {data.spent.toLocaleString(locale)}
+          </p>
+          <p className="text-sm text-gray-700">
+            <span className="text-[#10B981]">● {t.reports.remainingBudgetPercent.replace(' (%)', '')}:</span> USD {data.remaining.toLocaleString(locale)}
+          </p>
+          <p className="text-sm text-gray-500 mt-1">
+            Total: USD {budgetLimit.toLocaleString(locale)}
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
+
+  const handleExportCSV = () => {
+    const lines: string[] = [];
+
+    // Selected filters
+    const selectedPeriodLabel =
+      selectedPeriod === 'week' ? t.reports.periodWeek :
+      selectedPeriod === 'month' ? t.reports.periodMonth :
+      selectedPeriod === 'quarter' ? t.reports.periodQuarter :
+      selectedPeriod === 'year' ? t.reports.periodYear : selectedPeriod;
+
+    const selectedDepartmentLabel =
+      selectedDepartment === 'all' ? t.reports.allDepartments : (t.employees.departments as any)[selectedDepartment] ?? selectedDepartment;
+
+    const selectedMonthLabel = selectedMonth === 'all' ? t.reports.allMonths : (() => {
+      const idx = Number(selectedMonth) - 1;
+      const key = monthKeys[idx >= 0 && idx < monthKeys.length ? idx : 0];
+      return t.reports.months[key];
+    })();
+
+    lines.push(`"Filters"`);
+    lines.push(`"${t.reports.filters.period}","${selectedPeriodLabel}"`);
+    lines.push(`"${t.reports.filters.department}","${selectedDepartmentLabel}"`);
+    lines.push(`"${t.reports.filters.year}","${selectedYear}"`);
+    lines.push(`"${t.reports.filters.month}","${selectedMonthLabel}"`);
+    lines.push('');
+
+    // Expenses by Category
+    lines.push(`"${t.reports.expensesByCategory}"`);
+    lines.push(`"${t.expenses.category}","${t.expenses.amount}"`);
+    expensesByCategoryLocalized.forEach(e => {
+      lines.push(`"${e.name}","${e.value}"`);
+    });
+    lines.push('');
+
+    // Budget Utilization (now includes month index)
+    lines.push(`"${t.reports.budgetUtilization}"`);
+    lines.push(`"${t.reports.csv.month}","${t.reports.csv.monthIndex || 'Month #'}","${t.reports.csv.spent}","${t.reports.csv.remaining}","${t.reports.csv.spentPercent}","${t.reports.csv.remainingPercent}"`);
+    budgetDataLocalized.forEach(d => {
+      lines.push(`"${d.month}","${d.monthIndex}","${d.spent}","${d.remaining}","${d.spentPercent.toFixed(2)}","${d.remainingPercent.toFixed(2)}"`);
+    });
+    lines.push('');
+
+    // Department Overview
+    lines.push(`"${t.reports.departmentOverview}"`);
+    lines.push(`"${t.reports.department}","${t.reports.csv.spent}","${t.reports.csv.employees}"`);
+    departmentDataLocalized.forEach(d => {
+      lines.push(`"${d.department}","${d.expenses}","${d.employees}"`);
+    });
+    lines.push('');
+
+    // Top Spenders
+    lines.push(`"${t.reports.topSpenders}"`);
+    lines.push(`"Name","${t.expenses.amount}","${t.reports.department}"`);
+    topSpendersLocalized.forEach(s => {
+      lines.push(`"${s.name}","${s.amount}","${s.department}"`);
+    });
+
+    const csv = lines.join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const fileName = `reports_export_${new Date().toISOString().slice(0, 10)}.csv`;
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -180,7 +277,7 @@ export function ReportsPage({ t }: ReportsPageProps) {
               <h1 className="text-gray-900 mb-2">{t.reports.title}</h1>
               <p className="text-gray-600">{t.reports.subtitle}</p>
             </div>
-            <Button className="bg-[#E60000] hover:bg-[#CC0000] text-white">
+            <Button className="bg-[#E60000] hover:bg-[#CC0000] text-white" onClick={handleExportCSV}>
               <Download className="w-4 h-4 mr-2" />
               {t.reports.export}
             </Button>
@@ -289,7 +386,7 @@ export function ReportsPage({ t }: ReportsPageProps) {
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
                   <Pie
-                    data={expensesByCategory}
+                    data={expensesByCategoryLocalized}
                     cx="50%"
                     cy="50%"
                     labelLine={false}
@@ -298,7 +395,7 @@ export function ReportsPage({ t }: ReportsPageProps) {
                     fill="#8884d8"
                     dataKey="value"
                   >
-                    {expensesByCategory.map((entry, index) => (
+                    {expensesByCategoryLocalized.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
@@ -316,17 +413,17 @@ export function ReportsPage({ t }: ReportsPageProps) {
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={budgetData}>
+                <BarChart data={budgetDataLocalized}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis 
+                  <XAxis dataKey="month" tickFormatter={(val) => String(val).slice(0,3)} />
+                  <YAxis
                     label={{ value: '%', angle: 0, position: 'top' }}
                     domain={[0, 100]}
                   />
                   <Tooltip content={<CustomTooltip />} />
                   <Legend />
-                  <Bar dataKey="spentPercent" stackId="a" fill="#E60000" name="Approved expenses (%)" />
-                  <Bar dataKey="remainingPercent" stackId="a" fill="#10B981" name="Remaining budget (%)" />
+                  <Bar dataKey="spentPercent" stackId="a" fill="#E60000" name={t.reports.approvedExpensesPercent} />
+                  <Bar dataKey="remainingPercent" stackId="a" fill="#10B981" name={t.reports.remainingBudgetPercent} />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>
@@ -343,13 +440,13 @@ export function ReportsPage({ t }: ReportsPageProps) {
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={departmentData}>
+                <BarChart data={departmentDataLocalized}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="department" />
                   <YAxis />
                   <Tooltip />
                   <Legend />
-                  <Bar dataKey="expenses" fill="#E60000" name="Expenses (USD)" />
+                  <Bar dataKey="expenses" fill="#E60000" name={t.reports.expensesUSD} />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>
@@ -363,12 +460,11 @@ export function ReportsPage({ t }: ReportsPageProps) {
             </CardHeader>
             <CardContent>
               <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2">
-                {topSpenders.map((spender, index) => (
+                {topSpendersLocalized.map((spender, index) => (
                   <div key={index} className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className={`w-8 h-8 rounded-full ${
-                        index < 3 ? 'bg-[#E60000]' : 'bg-gray-400'
-                      } text-white flex items-center justify-center text-sm font-semibold`}>
+                      <div className={`w-8 h-8 rounded-full ${index < 3 ? 'bg-[#E60000]' : 'bg-gray-400'
+                        } text-white flex items-center justify-center text-sm font-semibold`}>
                         {index + 1}
                       </div>
                       <div>
@@ -376,7 +472,7 @@ export function ReportsPage({ t }: ReportsPageProps) {
                         <p className="text-sm text-gray-500">{spender.department}</p>
                       </div>
                     </div>
-                    <p className="text-gray-900 font-semibold">USD {spender.amount.toLocaleString()}</p>
+                    <p className="text-gray-900 font-semibold">USD {spender.amount.toLocaleString(locale)}</p>
                   </div>
                 ))}
               </div>

@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { AlertTriangle, CheckCircle, AlertCircle } from 'lucide-react';
+import { AlertTriangle, CheckCircle, AlertCircle, Search } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { Button } from '../components/ui/button';
 import { Textarea } from '../components/ui/textarea';
 import { Label } from '../components/ui/label';
+import { Input } from '../components/ui/input';
 import {
   Dialog,
   DialogContent,
@@ -14,10 +15,12 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import type { TranslationKeys } from '../translations';
+import type { TranslationKeys, Language } from '../translations';
+import { formatDate } from '../lib/date';
 
 interface AlertsPageProps {
   t: TranslationKeys;
+  language: Language;
 }
 
 interface Alert {
@@ -100,12 +103,28 @@ const mockResolvedAlerts: Alert[] = [
   },
 ];
 
-export function AlertsPage({ t }: AlertsPageProps) {
+export function AlertsPage({ t, language }: AlertsPageProps) {
   const { user } = useAuth();
   const [activeAlerts] = useState<Alert[]>(mockActiveAlerts);
   const [resolvedAlerts] = useState<Alert[]>(mockResolvedAlerts);
+  const [activeSearch, setActiveSearch] = useState('');
+  const [resolvedSearch, setResolvedSearch] = useState('');
   const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null);
   const [resolveNote, setResolveNote] = useState('');
+
+  // Filter functions
+  const filterAlerts = (alerts: Alert[], query: string) => {
+    const q = query.trim().toLowerCase();
+    if (!q) return alerts;
+    return alerts.filter(alert =>
+      alert.employeeName.toLowerCase().includes(q) ||
+      alert.message.toLowerCase().includes(q) ||
+      (alert.amount ? alert.amount.toString().includes(q) : false)
+    );
+  };
+
+  const filteredActive = filterAlerts(activeAlerts, activeSearch);
+  const filteredResolved = filterAlerts(resolvedAlerts, resolvedSearch);
 
   if (!user) return null;
 
@@ -175,7 +194,7 @@ export function AlertsPage({ t }: AlertsPageProps) {
           <tbody>
             {alerts.map((alert) => {
               const typeKey = alert.type as keyof typeof t.alerts.types;
-              
+
               return (
                 <tr key={alert.id} className="border-b border-gray-100 hover:bg-gray-50">
                   <td className="py-3 px-4">
@@ -196,7 +215,7 @@ export function AlertsPage({ t }: AlertsPageProps) {
                     {alert.amount ? `USD ${alert.amount.toFixed(2)}` : '-'}
                   </td>
                   <td className="py-3 px-4 text-gray-700 text-sm">
-                    {new Date(alert.triggeredAt).toLocaleString('pt-BR')}
+                    {formatDate(alert.triggeredAt, language)}
                   </td>
                   {!showActions && (
                     <>
@@ -270,9 +289,22 @@ export function AlertsPage({ t }: AlertsPageProps) {
                 <CardDescription>
                   {activeAlerts.length} {t.alerts.activeAttention}
                 </CardDescription>
+
+                {/* Search Bar */}
+                <div className="flex gap-4 mt-4">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <Input
+                      placeholder={t.common.search}
+                      value={activeSearch}
+                      onChange={(e) => setActiveSearch(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
-                {renderAlertsTable(activeAlerts, true)}
+                {renderAlertsTable(filteredActive, true)}
               </CardContent>
             </Card>
           </TabsContent>
@@ -287,9 +319,22 @@ export function AlertsPage({ t }: AlertsPageProps) {
                 <CardDescription>
                   {resolvedAlerts.length} {t.alerts.alertResolved}
                 </CardDescription>
+
+                {/* Search Bar */}
+                <div className="flex gap-4 mt-4">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <Input
+                      placeholder={t.common.search}
+                      value={resolvedSearch}
+                      onChange={(e) => setResolvedSearch(e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
               </CardHeader>
               <CardContent>
-                {renderAlertsTable(resolvedAlerts)}
+                {renderAlertsTable(filteredResolved)}
               </CardContent>
             </Card>
           </TabsContent>

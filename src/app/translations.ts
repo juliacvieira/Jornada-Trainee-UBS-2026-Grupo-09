@@ -33,6 +33,7 @@ export const translations = {
       descriptionPlaceholder: 'Descreva a despesa...',
       receipt: 'Comprovante',
       downloadReceipt: 'Baixar',
+      editDisabledTooltip: 'Edição disponível apenas para despesas pendentes',
       filterByStatus: 'Filtrar por Status',
       allStatus: 'Todos os Status',
       viewDetails: 'Ver Detalhes',
@@ -43,10 +44,9 @@ export const translations = {
       pendingDetails: 'Aguardando Aprovação',
       approvedBy: 'Aprovado por',
       rejectedBy: 'Rejeitado por',
-      approverRole: 'Cargo do aprovador',
-      rejectorRole: 'Cargo de quem rejeitou',
       rejectionReason: 'Motivo da Rejeição',
-      pendingMessage: 'Esta despesa está aguardando análise e aprovação do gestor ou departamento financeiro.',
+      pendingMessage: 'Esta despesa está aguardando análise e aprovação do gestor e departamento financeiro.',
+      partialApproveMessage: 'A despesa foi aprovada pelo gestor e agora aguarda aprovação do departamento financeiro.',
       categories: {
         travel: 'Viagem',
         meal: 'Refeição',
@@ -55,8 +55,7 @@ export const translations = {
       },
       statusLabels: {
         pending: 'Pendente',
-        managerApproved: 'Aprovado Gestor',
-        financeApproved: 'Aprovado Financeiro',
+        approved: 'Aprovado',
         rejected: 'Rejeitado',
       },
       limits: 'Limites por Categoria',
@@ -116,6 +115,7 @@ export const translations = {
       reviewedBy: 'Revisado por',
       reviewDate: 'Data da Revisão',
       viewReceipt: 'Ver Comprovante',
+      receipts: 'comprovante(s)',
     },
     // Alerts Page
     alerts: {
@@ -169,6 +169,25 @@ export const translations = {
       graphBudget: 'Percentual gasto vs. restante do orçamento mensal',
       graphDepartment: 'Gastos por departamento',
       graphTopExpenses: 'Despesas por funcionário durante o período',
+      // Chart labels and CSV headers
+      approvedExpensesPercent: 'Despesas aprovadas (%)',
+      remainingBudgetPercent: 'Orçamento restante (%)',
+      expensesUSD: 'Despesas (USD)',
+      csv: {
+        month: 'Mês',
+        monthIndex: 'Mês (#)',
+        spent: 'Gasto',
+        remaining: 'Restante',
+        spentPercent: 'Gasto (%)',
+        remainingPercent: 'Restante (%)',
+        employees: 'Funcionários',
+      },
+      filters: {
+        period: 'Período',
+        department: 'Departamento',
+        year: 'Ano',
+        month: 'Mês',
+      },
       months: {
         jan: 'Janeiro',
         feb: 'Fevereiro',
@@ -234,6 +253,7 @@ export const translations = {
       descriptionPlaceholder: 'Describe the expense...',
       receipt: 'Receipt',
       downloadReceipt: 'Download',
+      editDisabledTooltip: 'Editing available only for pending expenses',
       filterByStatus: 'Filter by Status',
       allStatus: 'All Status',
       viewDetails: 'View Details',
@@ -244,10 +264,9 @@ export const translations = {
       pendingDetails: 'Pending Approval',
       approvedBy: 'Approved by',
       rejectedBy: 'Rejected by',
-      approverRole: 'Approver Role',
-      rejectorRole: 'Role of the rejector',
       rejectionReason: 'Rejection Reason',
-      pendingMessage: 'This expense is awaiting analysis and approval from the manager or finance department.',
+      pendingMessage: 'This expense is awaiting analysis and approval from the manager and finance department.',
+      partialApproveMessage: 'The expense has been approved by the manager and now is awaiting finance department approval.',
       categories: {
         travel: 'Travel',
         meal: 'Meal',
@@ -256,8 +275,7 @@ export const translations = {
       },
       statusLabels: {
         pending: 'Pending',
-        managerApproved: 'Manager Approved',
-        financeApproved: 'Finance Approved',
+        approved: 'Approved',
         rejected: 'Rejected',
       },
       limits: 'Category Limits',
@@ -317,6 +335,7 @@ export const translations = {
       reviewedBy: 'Reviewed by',
       reviewDate: 'Review Date',
       viewReceipt: 'View Receipt',
+      receipts: 'receipt(s)',
     },
     // Alerts Page
     alerts: {
@@ -369,8 +388,25 @@ export const translations = {
       graphTrend: 'Expenses and approvals over time',
       graphBudget: 'Percentage spent vs. remaining monthly budget',
       graphDepartment: 'Expenses by departments',
-      graphTopExpenses: 'Expenses per employee during the period',
-      months: {
+      graphTopExpenses: 'Expenses per employee during the period',      // Chart labels and CSV headers
+      approvedExpensesPercent: 'Approved expenses (%)',
+      remainingBudgetPercent: 'Remaining budget (%)',
+      expensesUSD: 'Expenses (USD)',
+      csv: {
+        month: 'Month',
+        monthIndex: 'Month (#)',
+        spent: 'Spent',
+        remaining: 'Remaining',
+        spentPercent: 'Spent (%)',
+        remainingPercent: 'Remaining (%)',
+        employees: 'Employees',
+      },
+      filters: {
+        period: 'Period',
+        department: 'Department',
+        year: 'Year',
+        month: 'Month',
+      }, months: {
         jan: 'January',
         feb: 'February',
         mar: 'March',

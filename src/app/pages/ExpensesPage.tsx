@@ -1,7 +1,8 @@
 import { useState } from 'react';
-import { Plus, FileText, TrendingUp, Download, Edit, Search, ChevronDown, Eye } from 'lucide-react';
+import { Plus, FileText, TrendingUp, Download, Edit, Search, ChevronDown, Eye, Lock } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { Button } from '../components/ui/button';
+import { formatDate } from '../lib/date';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Textarea } from '../components/ui/textarea';
@@ -29,11 +30,12 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { Progress } from '../components/ui/progress';
-import type { TranslationKeys } from '../translations';
+import type { TranslationKeys, Language } from '../translations';
 import type { Expense, CategoryLimit } from '../types';
 
 interface ExpensesPageProps {
   t: TranslationKeys;
+  language: Language;
 }
 
 // Mock data - switch for real data integration
@@ -46,8 +48,8 @@ const mockExpenses: Expense[] = [
     date: '2025-12-20',
     description: 'Trip to conference in São Paulo',
     status: 'managerApproved',
-    approvedBy: 'Maria Santos',
-    approvedByRole: 'manager',
+    approvedBy: 'Julia Ferreira',
+    approvedByRole: 'finance',
   },
   {
     id: '2',
@@ -102,10 +104,10 @@ const mockLimits: CategoryLimit[] = [
   { category: 'other', limit: 1000, spent: 0 },
 ];
 
-export function ExpensesPage({ t }: ExpensesPageProps) {
+export function ExpensesPage({ t, language }: ExpensesPageProps) {
   const { user } = useAuth();
-  const [expenses] = useState<Expense[]>(mockExpenses);
-  const [limits] = useState<CategoryLimit[]>(mockLimits);
+  const [expenses, setExpenses] = useState<Expense[]>(mockExpenses);
+  const [limits, setLimits] = useState<CategoryLimit[]>(mockLimits);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false);
   const [selectedExpenseForDetails, setSelectedExpenseForDetails] = useState<Expense | null>(null);
@@ -122,10 +124,42 @@ export function ExpensesPage({ t }: ExpensesPageProps) {
 
   if (!user) return null;
 
+  // Date formatting handled by shared util `formatDate(dateStr, language)`
+
   const handleSubmitExpense = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle expense submission including receipt file
-    console.log('Receipt file:', receiptFile);
+
+    // Create new expense object
+    const expense: Expense = {
+      id: String(Date.now()), // Generate unique ID
+      employeeName: '', // Current user (in real app, from auth)
+      category: newExpense.category as 'travel' | 'meal' | 'transport' | 'other',
+      amount: parseFloat(newExpense.amount),
+      date: newExpense.date,
+      description: newExpense.description,
+      status: 'pending',
+      receipt: receiptFile ? receiptFile.name : undefined,
+    };
+
+    if (editingExpense) {
+      // Update existing expense
+      setExpenses(prev => prev.map(exp =>
+        exp.id === editingExpense.id ? { ...expense, id: editingExpense.id } : exp
+      ));
+    } else {
+      // Add new expense to the list
+      setExpenses(prev => [expense, ...prev]);
+
+      // Update limits (spent amount)
+      setLimits(prev => prev.map(limit => {
+        if (limit.category === expense.category) {
+          return { ...limit, spent: limit.spent + expense.amount };
+        }
+        return limit;
+      }));
+    }
+
+    // Reset form
     setIsDialogOpen(false);
     setNewExpense({ category: '', amount: '', date: '', description: '' });
     setReceiptFile(null);
@@ -138,10 +172,49 @@ export function ExpensesPage({ t }: ExpensesPageProps) {
     }
   };
 
-  const handleDownloadReceipt = (expenseId: string) => {
-    // Mock download - in real app, download from server
-    console.log('Downloading receipt for expense:', expenseId);
-    alert('Download started');
+  const handleDownloadReceipt = async (expenseId: string) => {
+    try {
+      // In a real app, fetch the file from the server or storage service
+      const expense = expenses.find((e) => e.id === expenseId);
+      let filename = expense?.receipt ?? `receipt-${expenseId}`;
+      const ext = filename.split('.').pop()?.toLowerCase();
+      let blob: Blob;
+
+      if (ext === 'png') {
+        const pngBase64 = '';
+        const bytes = Uint8Array.from(atob(pngBase64), (c) => c.charCodeAt(0));
+        blob = new Blob([bytes], { type: 'image/png' });
+        if (!filename.toLowerCase().endsWith('.png')) filename = `${filename}.png`;
+      } else {
+        blob = new Blob([
+          `Receipt for expense: ${expense?.description ?? expenseId}`
+        ], { type: 'application/pdf' });
+      }
+
+      // If the browser supports the File System Access API, let the user pick a directory
+      if ('showDirectoryPicker' in window) {
+        // @ts-ignore - experimental API
+        const dirHandle = await (window as any).showDirectoryPicker();
+        const fileHandle = await dirHandle.getFileHandle(filename, { create: true });
+        const writable = await fileHandle.createWritable();
+        await writable.write(blob);
+        await writable.close();
+        alert(`${filename} salvo na pasta escolhida.`);
+        return;
+      }
+
+      // Fallback: trigger a normal browser download (saves to Downloads or prompts based on browser settings)
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading the receipt:', error);
+    }
   };
 
   const handleEditExpense = (expense: Expense) => {
@@ -169,27 +242,51 @@ export function ExpensesPage({ t }: ExpensesPageProps) {
 
   // Filter expenses based on search and status
   const filteredExpenses = expenses.filter((expense) => {
-    const matchesSearch = 
+    const matchesSearch =
       expense.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
       expense.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
       expense.amount.toString().includes(searchQuery);
-    
-    const matchesStatus = statusFilter === 'all' || expense.status === statusFilter;
-    
-    return matchesSearch && matchesStatus;
+
+    if (statusFilter === 'approved') {
+      return (
+        matchesSearch &&
+        (expense.status === 'managerApproved' ||
+          expense.status === 'financeApproved')
+      );
+    }
+
+    if (statusFilter === 'all') {
+      return matchesSearch;
+    }
+
+    return matchesSearch && expense.status === statusFilter;
   });
 
-  const getStatusColor = (status: Expense['status']) => {
-    switch (status) {
-      case 'managerApproved':
-        return 'bg-green-100 text-green-800 border-green-200';
-      case 'financeApproved':
-        return 'bg-green-100 text-green-800 border-green-200';
-      case 'rejected':
-        return 'bg-red-100 text-red-800 border-red-200';
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+  function getDisplayStatus(status: Expense['status']) {
+    if (status === 'managerApproved' || status === 'financeApproved') {
+      return 'approved';
     }
+    return status;
+  }
+
+  const getStatusColor = (expense: Expense) => {
+    if (expense.status === 'rejected') {
+      return 'bg-red-100 text-red-800 border-red-200';
+    }
+
+    if (expense.status === 'pending') {
+      return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+    }
+
+    if (expense.approvedByRole === 'finance') {
+      return 'bg-green-100 text-green-800 border-green-200';
+    }
+
+    if (expense.approvedByRole === 'manager') {
+      return 'bg-orange-100 text-orange-800 border-orange-200';
+    }
+
+    return '';
   };
 
   return (
@@ -321,7 +418,7 @@ export function ExpensesPage({ t }: ExpensesPageProps) {
                 {limits.map((limit) => {
                   const percentage = (limit.spent / limit.limit) * 100;
                   const categoryKey = limit.category as keyof typeof t.expenses.categories;
-                  
+
                   return (
                     <div key={limit.category} className="space-y-2">
                       <div className="flex items-center justify-between">
@@ -375,8 +472,7 @@ export function ExpensesPage({ t }: ExpensesPageProps) {
                   <SelectContent>
                     <SelectItem value="all">{t.expenses.allStatus}</SelectItem>
                     <SelectItem value="pending">{t.expenses.statusLabels.pending}</SelectItem>
-                    <SelectItem value="managerApproved">{t.expenses.statusLabels.managerApproved}</SelectItem>
-                    <SelectItem value="financeApproved">{t.expenses.statusLabels.financeApproved}</SelectItem>
+                    <SelectItem value="approved">{t.expenses.statusLabels.approved}</SelectItem>
                     <SelectItem value="rejected">{t.expenses.statusLabels.rejected}</SelectItem>
                   </SelectContent>
                 </Select>
@@ -391,9 +487,9 @@ export function ExpensesPage({ t }: ExpensesPageProps) {
                       <th className="text-left py-3 px-4 text-gray-700">{t.expenses.category}</th>
                       <th className="text-left py-3 px-4 text-gray-700">{t.expenses.description}</th>
                       <th className="text-right py-3 px-4 text-gray-700">{t.expenses.amount}</th>
-                      <th 
+                      <th
                         className="text-center py-3 px-4 text-gray-700">{t.expenses.status}
-                          <DropdownMenu>
+                        <DropdownMenu>
                           <DropdownMenuTrigger className="p-2">
                             <ChevronDown className="w-4 h-4" />
                           </DropdownMenuTrigger>
@@ -404,11 +500,8 @@ export function ExpensesPage({ t }: ExpensesPageProps) {
                             <DropdownMenuItem onClick={() => setStatusFilter('pending')}>
                               {t.expenses.statusLabels.pending}
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setStatusFilter('managerApproved')}>
-                              {t.expenses.statusLabels.managerApproved}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setStatusFilter('financeApproved')}>
-                              {t.expenses.statusLabels.financeApproved}
+                            <DropdownMenuItem onClick={() => setStatusFilter('approved')}>
+                              {t.expenses.statusLabels.approved}
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => setStatusFilter('rejected')}>
                               {t.expenses.statusLabels.rejected}
@@ -422,12 +515,14 @@ export function ExpensesPage({ t }: ExpensesPageProps) {
                   <tbody>
                     {filteredExpenses.map((expense) => {
                       const categoryKey = expense.category as keyof typeof t.expenses.categories;
-                      const statusKey = expense.status as keyof typeof t.expenses.statusLabels;
-                      
+                      const displayStatus = getDisplayStatus(expense.status);
+                      const statusKey = displayStatus as keyof typeof t.expenses.statusLabels;
+                      const isEditable = expense.status === 'pending';
+
                       return (
                         <tr key={expense.id} className="border-b border-gray-100 hover:bg-gray-50">
                           <td className="py-3 px-4 text-gray-900">
-                            {new Date(expense.date).toLocaleDateString('pt-BR')}
+                            {formatDate(expense.date, language)}
                           </td>
                           <td className="py-3 px-4">
                             <Badge variant="outline" className="bg-gray-50">
@@ -442,7 +537,7 @@ export function ExpensesPage({ t }: ExpensesPageProps) {
                           </td>
                           <td className="py-3 px-4">
                             <div className="flex items-center justify-center gap-2">
-                              <Badge className={getStatusColor(expense.status)}>
+                              <Badge className={getStatusColor(expense)}>
                                 {t.expenses.statusLabels[statusKey]}
                               </Badge>
                               <button
@@ -453,11 +548,14 @@ export function ExpensesPage({ t }: ExpensesPageProps) {
                                 <Eye className="w-4 h-4 text-gray-600" />
                               </button>
                               <button
-                                onClick={() => handleEditExpense(expense)}
-                                className="p-1 hover:bg-gray-200 rounded transition-colors"
-                                title={t.common.edit}
+                                onClick={() => isEditable && handleEditExpense(expense)}
+                                className={`p-1 rounded transition-colors ${isEditable ? 'hover:bg-gray-200' : 'opacity-50 cursor-not-allowed group'}`}
+                                title={isEditable ? t.common.edit : t.expenses.editDisabledTooltip}
+                                aria-disabled={!isEditable}
+                                tabIndex={isEditable ? 0 : -1}
                               >
-                                <Edit className="w-4 h-4 text-gray-600" />
+                                <Edit className={`w-4 h-4 ${isEditable ? 'text-gray-600' : 'text-gray-400 group-hover:hidden'}`} />
+                                {!isEditable && <Lock className="w-4 h-4 text-gray-600 hidden group-hover:inline" />}
                               </button>
                             </div>
                           </td>
@@ -496,7 +594,7 @@ export function ExpensesPage({ t }: ExpensesPageProps) {
                 <div>
                   <Label className="text-gray-600 text-sm">{t.expenses.date}</Label>
                   <p className="text-gray-900 mt-1">
-                    {new Date(selectedExpenseForDetails.date).toLocaleDateString('pt-BR')}
+                    {formatDate(selectedExpenseForDetails.date, language)}
                   </p>
                 </div>
                 <div>
@@ -526,32 +624,50 @@ export function ExpensesPage({ t }: ExpensesPageProps) {
               <div>
                 <Label className="text-gray-600 text-sm">{t.expenses.status}</Label>
                 <p className="mt-1">
-                  <Badge className={getStatusColor(selectedExpenseForDetails.status)}>
-                    {t.expenses.statusLabels[selectedExpenseForDetails.status as keyof typeof t.expenses.statusLabels]}
+                  <Badge className={getStatusColor(selectedExpenseForDetails)}>
+                    {t.expenses.statusLabels[getDisplayStatus(selectedExpenseForDetails.status) as keyof typeof t.expenses.statusLabels]}
                   </Badge>
                 </p>
               </div>
 
               {/* Show approval/rejection details */}
-              {selectedExpenseForDetails.status === 'managerApproved' || selectedExpenseForDetails.status === 'financeApproved' 
-                && selectedExpenseForDetails.approvedBy && (
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                  <Label className="text-green-800 text-sm font-semibold">
-                    {t.expenses.approvalDetails}
-                  </Label>
-                  <div className="mt-2 space-y-1">
-                    <p className="text-sm text-green-900">
-                      <strong>{t.expenses.approvedBy}:</strong> {selectedExpenseForDetails.approvedBy}
-                    </p>
-                    <p className="text-sm text-green-900">
-                      <strong>{t.expenses.approverRole}:</strong>{' '}
-                      {selectedExpenseForDetails.approvedByRole === 'manager' 
-                        ? t.employees.roles.manager 
-                        : t.employees.roles.finance}
-                    </p>
+              {selectedExpenseForDetails.status !== 'pending' &&
+                selectedExpenseForDetails.status !== 'rejected' &&
+                selectedExpenseForDetails.approvedBy &&
+                selectedExpenseForDetails.approvedByRole === 'manager' && (
+                  <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                    <Label className="text-orange-800 text-sm font-semibold">
+                      {t.expenses.approvalDetails}
+                    </Label>
+                    <div className="mt-2 space-y-1">
+                      <p className="text-sm text-orange-900">
+                        <strong>{t.expenses.approvedBy}:</strong>{' '}
+                        {selectedExpenseForDetails.approvedBy} – {t.employees.roles.manager}
+                      </p>
+                      <p className="text-sm text-orange-900">
+                        {t.expenses.partialApproveMessage}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+
+              {selectedExpenseForDetails.status !== 'pending' &&
+                selectedExpenseForDetails.status !== 'rejected' &&
+                selectedExpenseForDetails.approvedBy &&
+                selectedExpenseForDetails.approvedByRole === 'finance' && (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <Label className="text-green-800 text-sm font-semibold">
+                      {t.expenses.approvalDetails}
+                    </Label>
+                    <div className="mt-2 space-y-1">
+                      <p className="text-sm text-green-900">
+                        <strong>{t.expenses.approvedBy}:</strong>{' '}
+                        {selectedExpenseForDetails.approvedBy} – {t.employees.roles.finance}
+                      </p>
+                    </div>
+                  </div>
+                )
+              }
 
               {selectedExpenseForDetails.status === 'rejected' && selectedExpenseForDetails.rejectedBy && (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-4">
@@ -560,12 +676,8 @@ export function ExpensesPage({ t }: ExpensesPageProps) {
                   </Label>
                   <div className="mt-2 space-y-2">
                     <p className="text-sm text-red-900">
-                      <strong>{t.expenses.rejectedBy}:</strong> {selectedExpenseForDetails.rejectedBy}
-                    </p>
-                    <p className="text-sm text-red-900">
-                      <strong>{t.expenses.rejectorRole}:</strong>{' '}
-                      {selectedExpenseForDetails.rejectedByRole === 'manager' 
-                        ? t.employees.roles.manager 
+                      <strong>{t.expenses.rejectedBy}:</strong> {selectedExpenseForDetails.rejectedBy} {'-'} {selectedExpenseForDetails.rejectedByRole === 'manager'
+                        ? t.employees.roles.manager
                         : t.employees.roles.finance}
                     </p>
                     {selectedExpenseForDetails.rejectionReason && (

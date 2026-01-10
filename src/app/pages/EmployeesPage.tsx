@@ -42,7 +42,6 @@ const mockEmployees: Employee[] = [
     name: "Ana Costa",
     email: "ana.costa@ubs.com",
     department: "sales",
-    role: "manager",
     managerId: "2",
   },
   {
@@ -50,7 +49,6 @@ const mockEmployees: Employee[] = [
     name: "Carlos Silva",
     email: "carlos.silva@ubs.com",
     department: "it",
-    role: "manager",
     managerId: "1",
   },
   {
@@ -58,7 +56,6 @@ const mockEmployees: Employee[] = [
     name: "João Santos",
     email: "joao.santos@ubs.com",
     department: "sales",
-    role: "employee",
     managerId: "1",
   },
   {
@@ -66,7 +63,6 @@ const mockEmployees: Employee[] = [
     name: "Mariana Souza",
     email: "mariana.souza@ubs.com",
     department: "marketing",
-    role: "employee",
     managerId: "2",
   },
   {
@@ -74,7 +70,6 @@ const mockEmployees: Employee[] = [
     name: "Pedro Lima",
     email: "pedro.lima@ubs.com",
     department: "it",
-    role: "employee",
     managerId: "2",
   },
   {
@@ -82,14 +77,13 @@ const mockEmployees: Employee[] = [
     name: "Julia Oliveira",
     email: "julia.oliveira@ubs.com",
     department: "finance",
-    role: "finance",
     managerId: "1",
   },
 ];
 
 export function EmployeesPage({ t }: EmployeesPageProps) {
   const { user } = useAuth();
-  const [employees] = useState<Employee[]>(mockEmployees);
+  const [employees, setEmployees] = useState<Employee[]>(mockEmployees);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -98,7 +92,6 @@ export function EmployeesPage({ t }: EmployeesPageProps) {
     name: "",
     email: "",
     department: "",
-    role: "",
     managerId: "",
   });
 
@@ -106,13 +99,34 @@ export function EmployeesPage({ t }: EmployeesPageProps) {
 
   const handleSubmitEmployee = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle employee submission
+
+    // Create new employee object
+    const employee: Employee = {
+      id: String(Date.now()), // Generate unique ID
+      name: newEmployee.name,
+      email: newEmployee.email,
+      department: newEmployee.department,
+      managerId: newEmployee.managerId,
+    };
+
+    if (editingEmployee) {
+      // Update existing employee
+      setEmployees((prev) =>
+        prev.map((emp) =>
+          emp.id === editingEmployee.id ? { ...employee, id: editingEmployee.id } : emp
+        )
+      );
+    } else {
+      // Add new employee to the list
+      setEmployees((prev) => [employee, ...prev]);
+    }
+
+    // Reset form
     setIsDialogOpen(false);
     setNewEmployee({
       name: "",
       email: "",
       department: "",
-      role: "",
       managerId: "",
     });
     setEditingEmployee(null);
@@ -124,7 +138,6 @@ export function EmployeesPage({ t }: EmployeesPageProps) {
       name: employee.name,
       email: employee.email,
       department: employee.department,
-      role: employee.role,
       managerId: employee.managerId,
     });
     setIsDialogOpen(true);
@@ -139,14 +152,17 @@ export function EmployeesPage({ t }: EmployeesPageProps) {
   const handleDeleteSelected = () => {
     if (selectedIds.length > 0) {
       console.log("Deleting employees:", selectedIds);
-      alert(`Excluindo ${selectedIds.length} funcionário(s)...`);
+      setEmployees((prev) => prev.filter((emp) => !selectedIds.includes(emp.id)));
       setSelectedIds([]);
     }
   };
 
-  // const handleDeleteEmployee = () => {
-    
-  // };
+  const handleDeleteEmployee = (id: string) => {
+    // Remove the employee with the given id
+    setEmployees((prev) => prev.filter((emp) => emp.id !== id));
+    // Also ensure it's removed from the selectedIds if present
+    setSelectedIds((prev) => prev.filter((selectedId) => selectedId !== id));
+  };
 
   // Filter employees based on search
   const filteredEmployees = employees.filter(
@@ -156,28 +172,9 @@ export function EmployeesPage({ t }: EmployeesPageProps) {
       employee.department.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const getRoleBadgeColor = (role: Employee["role"]) => {
-    switch (role) {
-      case "manager":
-        return "bg-purple-100 text-purple-800 border-purple-200";
-      case "finance":
-        return "bg-blue-100 text-blue-800 border-blue-200";
-      case "employee":
-        return "bg-gray-100 text-gray-800 border-gray-200";
-    }
-  };
-
-  const getManagerName = (managerId?: string) => {
-    if (!managerId) return "-";
-    const manager = employees.find(
-      (emp) => emp.id === managerId,
-    );
-    return manager?.name || "-";
-  };
-
-  const managers = employees.filter(
-    (emp) => emp.role === "manager",
-  );
+  // const managers = employees.filter(
+  //   (emp) => emp.role === "manager",
+  // );
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -294,74 +291,6 @@ export function EmployeesPage({ t }: EmployeesPageProps) {
                     </Select>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="role">
-                      {t.employees.role}
-                    </Label>
-                    <Select
-                      value={newEmployee.role}
-                      onValueChange={(value) =>
-                        setNewEmployee({
-                          ...newEmployee,
-                          role: value,
-                        })
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue
-                          placeholder={t.employees.selectRole}
-                        />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="employee">
-                          {t.employees.roles.employee}
-                        </SelectItem>
-                        <SelectItem value="manager">
-                          {t.employees.roles.manager}
-                        </SelectItem>
-                        <SelectItem value="finance">
-                          {t.employees.roles.finance}
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {newEmployee.role === "employee" && (
-                    <div className="space-y-2">
-                      <Label htmlFor="manager">
-                        {t.employees.manager}
-                      </Label>
-                      <Select
-                        value={newEmployee.managerId}
-                        onValueChange={(value) =>
-                          setNewEmployee({
-                            ...newEmployee,
-                            managerId: value,
-                          })
-                        }
-                        required={!editingEmployee}
-                      >
-                        <SelectTrigger>
-                          <SelectValue
-                            placeholder={
-                              t.employees.selectManager
-                            }
-                          />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {managers.map((manager) => (
-                            <SelectItem
-                              key={manager.id}
-                              value={manager.id}
-                            >
-                              {manager.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  )}
-
                   <div className="flex gap-2 pt-4">
                     <Button
                       type="button"
@@ -434,12 +363,6 @@ export function EmployeesPage({ t }: EmployeesPageProps) {
                     <th className="text-left py-3 px-4 text-gray-700">
                       {t.employees.department}
                     </th>
-                    <th className="text-left py-3 px-4 text-gray-700">
-                      {t.employees.role}
-                    </th>
-                    <th className="text-left py-3 px-4 text-gray-700">
-                      {t.employees.manager}
-                    </th>
                     <th className="text-center py-3 px-4 text-gray-700">
                       {t.expenses.actions}
                     </th>
@@ -449,8 +372,6 @@ export function EmployeesPage({ t }: EmployeesPageProps) {
                   {filteredEmployees.map((employee) => {
                     const departmentKey =
                       employee.department as keyof typeof t.employees.departments;
-                    const roleKey =
-                      employee.role as keyof typeof t.employees.roles;
 
                     return (
                       <tr
@@ -482,18 +403,6 @@ export function EmployeesPage({ t }: EmployeesPageProps) {
                           </Badge>
                         </td>
                         <td className="py-3 px-4">
-                          <Badge
-                            className={getRoleBadgeColor(
-                              employee.role,
-                            )}
-                          >
-                            {t.employees.roles[roleKey]}
-                          </Badge>
-                        </td>
-                        <td className="py-3 px-4 text-gray-700">
-                          {getManagerName(employee.managerId)}
-                        </td>
-                        <td className="py-3 px-4">
                           <div className="flex items-center justify-center gap-2">
                             <Button
                               onClick={() => handleEditEmployee(employee)}
@@ -508,6 +417,7 @@ export function EmployeesPage({ t }: EmployeesPageProps) {
                               variant="ghost"
                               size="icon"
                               className="h-8 w-8 text-red-600 hover:text-red-700"
+                              onClick={() => handleDeleteEmployee(employee.id)}
                               title={t.common.delete}
                             >
                               <Trash2 className="w-4 h-4" />

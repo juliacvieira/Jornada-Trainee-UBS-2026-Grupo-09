@@ -6,7 +6,7 @@ export interface Expense {
   date: string;
   description: string;
   status: 'pending' | 'managerApproved' | 'financeApproved' | 'rejected';
-  // receipt?: string;
+  receipt?: string;
   rejectedBy?: string;
   rejectedByRole?: 'manager' | 'finance';
   rejectionReason?: string;
@@ -19,7 +19,7 @@ export interface Employee {
   name: string;
   email: string;
   department: string;
-  role: 'employee' | 'manager' | 'finance';
+  // role: 'employee' | 'manager' | 'finance';
   managerId: string;
 }
 

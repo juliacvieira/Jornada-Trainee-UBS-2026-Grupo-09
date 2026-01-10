@@ -20,11 +20,11 @@ export default function App() {
   return (
     <Routes>
       {/* Pública */}
-      <Route 
-        path="/login" 
+      <Route
+        path="/login"
         element={
           <LoginPage t={t} language={language} onLanguageChange={setLanguage} />
-        } 
+        }
       />
 
       {/* Privadas */}
@@ -54,13 +54,13 @@ export default function App() {
       >
         <Route index element={<Navigate to="expenses" replace />} />
 
-        <Route path="expenses" element={<ExpensesPage t={t} />} />
+        <Route path="expenses" element={<ExpensesPage t={t} language={language} />} />
 
         <Route
           path="employees"
           element={
             <ProtectedRoute allowedRoles={["manager"]}>
-              <EmployeesPage t={t}/>
+              <EmployeesPage t={t} />
             </ProtectedRoute>
           }
         />
@@ -69,7 +69,7 @@ export default function App() {
           path="approval"
           element={
             <ProtectedRoute allowedRoles={["manager", "finance"]}>
-              <ApprovalPage t={t}/>
+              <ApprovalPage t={t} language={language} />
             </ProtectedRoute>
           }
         />
@@ -78,7 +78,7 @@ export default function App() {
           path="alerts"
           element={
             <ProtectedRoute allowedRoles={["finance"]}>
-              <AlertsPage t={t}/>
+              <AlertsPage t={t} language={language} />
             </ProtectedRoute>
           }
         />
@@ -87,7 +87,7 @@ export default function App() {
           path="reports"
           element={
             <ProtectedRoute allowedRoles={["finance"]}>
-              <ReportsPage t={t}/>
+              <ReportsPage t={t} language={language} />
             </ProtectedRoute>
           }
         />
