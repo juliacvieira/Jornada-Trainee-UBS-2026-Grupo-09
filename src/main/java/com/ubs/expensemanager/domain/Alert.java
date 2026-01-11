@@ -50,4 +50,6 @@ public class Alert {
 
     public Expense getExpense() { return expense; }
     public void setExpense(Expense expense) { this.expense = expense; }
+
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 }
