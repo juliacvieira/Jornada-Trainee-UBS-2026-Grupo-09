@@ -60,6 +60,8 @@ public class Expense {
     public void setDate(LocalDate date) { this.date = date; }
     public ExpenseStatus getStatus() { return status; }
     public void setStatus(ExpenseStatus status) { this.status = status; }
+    public boolean isNeedsReview() { return needsReview; }
+    public void setNeedsReview(boolean needsReview) { this.needsReview = needsReview; }
     public String getReceiptUrl() { return receiptUrl; }
     public void setReceiptUrl(String receiptUrl) { this.receiptUrl = receiptUrl; }
     public String getReceiptFilename() { return receiptFilename; }
