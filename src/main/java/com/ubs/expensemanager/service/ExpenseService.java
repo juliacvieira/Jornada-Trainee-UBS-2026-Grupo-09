@@ -20,6 +20,7 @@ import com.ubs.expensemanager.exception.BusinessException;
 import com.ubs.expensemanager.repository.CategoryRepository;
 import com.ubs.expensemanager.repository.EmployeeRepository;
 import com.ubs.expensemanager.repository.ExpenseRepository;
+import com.ubs.expensemanager.service.AlertService;
 
 @Service
 public class ExpenseService {
@@ -27,10 +28,12 @@ public class ExpenseService {
 	private final ExpenseRepository expenseRepository;
     private final EmployeeRepository employeeRepository;
     private final CategoryRepository categoryRepository;
+    private final AlertService alertService;
 
     public ExpenseService(ExpenseRepository expenseRepository,
             EmployeeRepository employeeRepository,
-            CategoryRepository categoryRepository) {
+            CategoryRepository categoryRepository,
+            AlertService alertService) {
 		this.expenseRepository = expenseRepository;
 		this.employeeRepository = employeeRepository;
 		this.categoryRepository = categoryRepository;
@@ -39,22 +42,24 @@ public class ExpenseService {
     @Transactional
     public Expense createExpense(CreateExpenseRequest request) {
         Employee employee = employeeRepository.findById(request.employeeId())
-            .orElseThrow(() -> new BusinessException("Employee not found"));
+                .orElseThrow(() -> new BusinessException("Employee not found"));
         Category category = categoryRepository.findById(request.categoryId())
-            .orElseThrow(() -> new BusinessException("Category not found"));
+                .orElseThrow(() -> new BusinessException("Category not found"));
 
         Expense expense = new Expense();
         expense.setEmployee(employee);
         expense.setCategory(category);
         expense.setAmount(request.amount());
-        expense.setDate(request.date());
-        expense.setCurrency(request.currency());
+        expense.setDate(request.date() != null ? request.date() : LocalDate.now());
+        expense.setCurrency((request.currency() == null || request.currency().isBlank()) ? "BRL" : request.currency());
         expense.setDescription(request.description());
         expense.setStatus(ExpenseStatus.PENDING);
 
-        validateExpenseForCreate(expense);
+        Expense saved = expenseRepository.save(expense);
 
-        return expenseRepository.save(expense);
+        validateExpenseForCreate(saved);
+
+        return expenseRepository.save(saved);
     }
 
     @Transactional
@@ -105,17 +110,22 @@ public class ExpenseService {
 
         // check limits per category
         if (category.getDailyLimit() != null && amount.compareTo(category.getDailyLimit()) > 0) {
-            throw new BusinessException("Daily category limit exceeded");
+            expense.setNeedsReview(true);
+            alertService.createAlert(expense, com.ubs.expensemanager.domain.enums.AlertType.CATEGORY_LIMIT,
+                    "Daily category limit exceeded");
         }
         if (category.getMonthlyLimit() != null && amount.compareTo(category.getMonthlyLimit()) > 0) {
-            throw new BusinessException("Monthly category limit exceeded");
+            expense.setNeedsReview(true);
+            alertService.createAlert(expense, com.ubs.expensemanager.domain.enums.AlertType.CATEGORY_LIMIT,
+                    "Monthly category limit exceeded");
         }
 
         // department budget considering the the already approved expenses
         Employee employee = expense.getEmployee();
-        Department department = employee != null ? employee.getDepartment() : null;
-        if (department == null || department.getMonthlyBudget() == null) {
-            throw new BusinessException("Department budget not configured");
+        if (alreadySpent.add(amount).compareTo(department.getMonthlyBudget()) > 0) {
+            expense.setNeedsReview(true);
+            alertService.createAlert(expense, com.ubs.expensemanager.domain.enums.AlertType.DEPARTMENT_BUDGET,
+                    "Department monthly budget exceeded");
         }
 
         YearMonth ym = YearMonth.from(expense.getDate());
