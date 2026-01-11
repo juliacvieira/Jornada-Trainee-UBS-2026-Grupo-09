@@ -3,8 +3,10 @@ package com.ubs.expensemanager.service;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.UUID;
+import java.math.BigDecimal;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.ubs.expensemanager.domain.Category;
 import com.ubs.expensemanager.dto.category.CreateCategoryRequest;
@@ -19,6 +21,7 @@ public class CategoryService {
         this.repository = repository;
     }
 
+    @Transactional
     public Category createCategory (CreateCategoryRequest request){
         Category category = new Category();
 
@@ -26,24 +29,15 @@ public class CategoryService {
         category.setDailyLimit(request.dailyLimit());
         category.setMonthlyLimit(request.monthlyLimit());
         
-        boolean valid = validateCategory(category);
-
-        try {
-            if (valid == true) {
-            Category saved = repository.save(category);
-            return saved;
-        }
-        } catch (Exception e) {
-            System.out.println("Validation exception: " + e);
-        }
-
-        return category;
+        validateCategory(category);
+        return repository.save(category);
     }
 
     public List<Category> findAll(){
         return repository.findAll();
     }
 
+    @Transactional
     public Category updateCategory (UUID id, UpdateCategoryRequest request){
         Category category = findById(id);
 
@@ -51,8 +45,8 @@ public class CategoryService {
         category.setName(request.name());
         category.setDailyLimit(request.dailyLimit());
         category.setMonthlyLimit(request.monthlyLimit());
-
-        return category;
+        validateCategory(category);
+        return repository.save(category);
 
     }
 
@@ -62,7 +56,16 @@ public class CategoryService {
     }
 
     private boolean validateCategory (Category category){
-        //validacao - work in progress
+    	if (category.getDailyLimit() == null || category.getMonthlyLimit() == null) {
+            throw new IllegalArgumentException("Limits must be provided");
+        }
+        if (category.getDailyLimit().compareTo(BigDecimal.ZERO) < 0 ||
+            category.getMonthlyLimit().compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Limits must be non-negative");
+        }
+        if (category.getMonthlyLimit().compareTo(category.getDailyLimit()) < 0) {
+            throw new IllegalArgumentException("Monthly limit must be >= daily limit");
+        }
 
         return true;
     }

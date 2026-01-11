@@ -1,12 +1,11 @@
 package com.ubs.expensemanager.dto.employee;
 
-import com.ubs.expensemanager.domain.Department;
-import com.ubs.expensemanager.domain.Employee;
+import java.util.UUID;
 
-public record UpdateEmployeeRequest(String name,
-                                    String email,
-                                    Employee manager,
-                                    Department department,
-                                    String position
-                                    ) 
+public record UpdateEmployeeRequest(
+		String name,
+		String email,
+		String position,
+		UUID departmentId,
+		UUID managerId)
 {}

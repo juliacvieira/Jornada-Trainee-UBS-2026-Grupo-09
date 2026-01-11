@@ -2,14 +2,13 @@ package com.ubs.expensemanager.dto.expense;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.UUID;
 
-import com.ubs.expensemanager.domain.Category;
-import com.ubs.expensemanager.domain.Employee;
-
-public record CreateExpenseRequest(Employee employee,
-                                    Category category,
-                                    BigDecimal amount,
-                                    String currency,
-                                    LocalDate date,
-                                    String description) 
-{}
+public record CreateExpenseRequest(
+	    UUID employeeId,
+	    UUID categoryId,
+	    BigDecimal amount,
+	    LocalDate date,
+	    String currency,
+	    String description
+) {}
