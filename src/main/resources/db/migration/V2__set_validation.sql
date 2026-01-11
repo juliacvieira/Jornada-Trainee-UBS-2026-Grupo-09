@@ -5,9 +5,9 @@ CREATE TYPE status_expense AS ENUM ('PENDING',
                                     'REJECTED');
 
 --Currently there is no data yet in our DB, but for future scenarios we have implemented this update
-UPDATE expenses
-SET status = 'APPROVED_MANAGER'
-WHERE status = 'APPROVED';
+--UPDATE expenses
+--SET status = 'APPROVED_MANAGER'
+--WHERE status = 'APPROVED';
 
 
 -- Updating the table 'expenses' that used the old ENUM in the 'status' column
