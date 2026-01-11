@@ -1,4 +1,3 @@
-// import { useState } from 'react';
 import { ChevronDown, ArrowRightToLine } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
@@ -74,8 +73,6 @@ export function Navbar({ language, onLanguageChange }: NavbarProps) {
         {/* Logout */}
         <Button
           className="bg-[#E60000] hover:bg-[#CC0000] text-white"
-          variant="outline"
-          size="sm"
           onClick={handleLogout}
         >
           <ArrowRightToLine className="w-3 h-3 mr-1" />

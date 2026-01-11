@@ -549,7 +549,12 @@ export function ExpensesPage({ t, language }: ExpensesPageProps) {
                               </button>
                               <button
                                 onClick={() => isEditable && handleEditExpense(expense)}
-                                className={`p-1 rounded transition-colors ${isEditable ? 'hover:bg-gray-200' : 'opacity-50 cursor-not-allowed group'}`}
+                                className={
+                                  `p-1 rounded transition-colors ${isEditable ? 
+                                    'hover:bg-gray-200' : 
+                                    'opacity-50 cursor-not-allowed group'
+                                  }`
+                                }
                                 title={isEditable ? t.common.edit : t.expenses.editDisabledTooltip}
                                 aria-disabled={!isEditable}
                                 tabIndex={isEditable ? 0 : -1}
@@ -676,7 +681,8 @@ export function ExpensesPage({ t, language }: ExpensesPageProps) {
                   </Label>
                   <div className="mt-2 space-y-2">
                     <p className="text-sm text-red-900">
-                      <strong>{t.expenses.rejectedBy}:</strong> {selectedExpenseForDetails.rejectedBy} {'-'} {selectedExpenseForDetails.rejectedByRole === 'manager'
+                      <strong>{t.expenses.rejectedBy}:</strong> 
+                      {selectedExpenseForDetails.rejectedBy} {'-'} {selectedExpenseForDetails.rejectedByRole === 'manager'
                         ? t.employees.roles.manager
                         : t.employees.roles.finance}
                     </p>

@@ -110,15 +110,6 @@ export function ReportsPage({ t, language }: ReportsPageProps) {
     name: t.expenses.categories[categoryKeyMap[e.name] ?? 'other'] ?? e.name,
   }));
 
-  // Translate top spenders' department labels for CSV/display
-  const deptKeyForTop: Record<string, keyof typeof t.employees.departments> = {
-    Sales: 'sales',
-    IT: 'it',
-    Marketing: 'marketing',
-    HR: 'hr',
-    Financial: 'finance',
-  };
-
   // Translate department labels for X axis
   const departmentKeyMap: Record<string, keyof typeof t.employees.departments> = {
     IT: 'it',
