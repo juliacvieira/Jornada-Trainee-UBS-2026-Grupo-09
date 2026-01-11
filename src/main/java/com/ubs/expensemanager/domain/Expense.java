@@ -34,6 +34,9 @@ public class Expense {
     @Enumerated(EnumType.STRING)
     private ExpenseStatus status = ExpenseStatus.PENDING;
 
+    @Column(nullable = false)
+    private boolean needsReview = false;
+
     // simulated receipt metadata
     private String receiptUrl;
     private String receiptFilename;

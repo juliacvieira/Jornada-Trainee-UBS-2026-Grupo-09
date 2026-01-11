@@ -22,6 +22,7 @@ public class ExpenseMapper {
             expense.getDate(),
             expense.getDescription(),
             expense.getStatus(),
+            expense.isNeedsReview(),
             expense.getReceiptUrl(),
             expense.getReceiptFilename()
         );
