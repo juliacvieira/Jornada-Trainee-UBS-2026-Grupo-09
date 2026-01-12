@@ -10,6 +10,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 
 import com.ubs.expensemanager.service.ExpenseService;
 import com.ubs.expensemanager.domain.Expense;
@@ -53,4 +59,30 @@ public class ExpenseController {
         Expense expense = service.updateExpense(id, request);
         return mapper.toResponse(expense);
     }
+
+    @PostMapping("/{id}/receipt")
+    public ExpenseResponse uploadReceipt(
+            @PathVariable UUID id,
+            @RequestParam("file") MultipartFile file
+    ) {
+        Expense updated = service.attachReceipt(id, file);
+        return mapper.toResponse(updated);
+    }
+
+    @GetMapping("/{id}/receipt")
+    public ResponseEntity<Resource> downloadReceipt(@PathVariable UUID id) {
+        Resource resource = service.loadReceipt(id);
+
+        // best-effort filename
+        String filename = "receipt";
+        if (resource.getFilename() != null) {
+            filename = resource.getFilename();
+        }
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(resource);
+    }
+
 }

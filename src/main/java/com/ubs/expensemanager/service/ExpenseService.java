@@ -21,6 +21,8 @@ import com.ubs.expensemanager.repository.CategoryRepository;
 import com.ubs.expensemanager.repository.EmployeeRepository;
 import com.ubs.expensemanager.repository.ExpenseRepository;
 import com.ubs.expensemanager.service.AlertService;
+import com.ubs.expensemanager.service.ReceiptStorageService;
+
 
 @Service
 public class ExpenseService {
@@ -29,6 +31,7 @@ public class ExpenseService {
     private final EmployeeRepository employeeRepository;
     private final CategoryRepository categoryRepository;
     private final AlertService alertService;
+    private final ReceiptStorageService receiptStorageService;
 
     public ExpenseService(ExpenseRepository expenseRepository,
             EmployeeRepository employeeRepository,
@@ -37,6 +40,7 @@ public class ExpenseService {
 		this.expenseRepository = expenseRepository;
 		this.employeeRepository = employeeRepository;
 		this.categoryRepository = categoryRepository;
+        this.receiptStorageService = receiptStorageService;
 	}
 
     @Transactional
@@ -177,5 +181,23 @@ public class ExpenseService {
             throw new BusinessException("Department monthly budget exceeded");
         }
     }
+
+    @Transactional
+    public Expense attachReceipt(UUID expenseId, org.springframework.web.multipart.MultipartFile file) {
+        Expense expense = findById(expenseId);
+
+        String storedName = receiptStorageService.store(expenseId, file);
+
+        expense.setReceiptFilename(storedName);
+        expense.setReceiptUrl("/expense/" + expenseId + "/receipt"); // “URL fake” but functional
+
+        return expenseRepository.save(expense);
+    }
+
+    public org.springframework.core.io.Resource loadReceipt(UUID expenseId) {
+        Expense expense = findById(expenseId);
+        return receiptStorageService.loadAsResource(expense.getReceiptFilename());
+    }
+
 
 }
