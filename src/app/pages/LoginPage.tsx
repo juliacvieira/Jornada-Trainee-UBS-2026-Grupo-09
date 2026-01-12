@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from '../hooks/useAuth';
-import type { UserRole } from "@/app/auth/types";
+import type { UserRole } from "../auth/types";
 import { ChevronDown, Eye, EyeOff } from 'lucide-react';
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
@@ -27,7 +27,7 @@ export function LoginPage({ t, language, onLanguageChange }: LoginPageProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [role, setRole] = useState<UserRole>("employee");
+  const [role, setRole] = useState<"EMPLOYEE" | "MANAGER" | "FINANCE">("EMPLOYEE");
 
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -37,6 +37,17 @@ export function LoginPage({ t, language, onLanguageChange }: LoginPageProps) {
     login(email || "user@ubs.com", role);
     navigate("/expenses");
   }
+
+//   async function handleSubmit(e: React.FormEvent) {
+//   e.preventDefault();
+
+//   try {
+//     await login(email, password);
+//     navigate('/expenses');
+//   } catch (err) {
+//     console.error('Login failed:', err);
+//   }
+// };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 p-8">
@@ -110,9 +121,9 @@ export function LoginPage({ t, language, onLanguageChange }: LoginPageProps) {
                 onChange={(e) => setRole(e.target.value as UserRole)}
                 className="w-full rounded-md border bg-input px-3 py-2 text-sm"
               >
-                <option value="employee">{t.employees.roles.employee}</option>
-                <option value="manager">{t.employees.roles.manager}</option>
-                <option value="finance">{t.employees.roles.finance}</option>
+                <option value="EMPLOYEE">{t.employees.roles.employee}</option>
+                <option value="MANAGER">{t.employees.roles.manager}</option>
+                <option value="FINANCE">{t.employees.roles.finance}</option>
               </select>
             </div>
 

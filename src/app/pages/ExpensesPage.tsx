@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Plus, FileText, TrendingUp, Download, Edit, Search, ChevronDown, Eye, Lock } from 'lucide-react';
+import { Plus, FileText, TrendingUp, Download, X, Search, Eye, Lock } from 'lucide-react';
+import { apiFetch } from '../services/apiClient';
 import { useAuth } from '../hooks/useAuth';
 import { Button } from '../components/ui/button';
 import { formatDate } from '../lib/date';
@@ -13,12 +14,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../components/ui/select';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '../components/ui/dropdown-menu';
 import {
   Dialog,
   DialogContent,
@@ -121,6 +116,9 @@ export function ExpensesPage({ t, language }: ExpensesPageProps) {
     date: '',
     description: '',
   });
+  const [selectedExpenseToCancel, setSelectedExpenseToCancel] = useState<Expense | null>(null);
+  const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
+  const [isCanceling, setIsCanceling] = useState(false);
 
   if (!user) return null;
 
@@ -199,7 +197,6 @@ export function ExpensesPage({ t, language }: ExpensesPageProps) {
         const writable = await fileHandle.createWritable();
         await writable.write(blob);
         await writable.close();
-        alert(`${filename} salvo na pasta escolhida.`);
         return;
       }
 
@@ -217,15 +214,39 @@ export function ExpensesPage({ t, language }: ExpensesPageProps) {
     }
   };
 
-  const handleEditExpense = (expense: Expense) => {
-    setEditingExpense(expense);
-    setNewExpense({
-      category: expense.category,
-      amount: expense.amount.toString(),
-      date: expense.date,
-      description: expense.description,
-    });
-    setIsDialogOpen(true);
+  const promptCancelExpense = (expense: Expense) => {
+    if (expense.status !== 'pending') return;
+    setSelectedExpenseToCancel(expense);
+    setIsCancelDialogOpen(true);
+  };
+
+  const confirmCancelExpense = async () => {
+    if (!selectedExpenseToCancel) return;
+    setIsCanceling(true);
+
+    try {
+      await apiFetch(`/expenses/${selectedExpenseToCancel.id}`, { method: 'DELETE' });
+    } catch (err) {
+      console.error('Error deleting expense:', err);
+      alert('Erro ao cancelar despesa no servidor. Tente novamente mais tarde.');
+      setIsCanceling(false);
+      return;
+    }
+
+    // On success, remove locally and rollback limits
+    setExpenses(prev => prev.filter(e => e.id !== selectedExpenseToCancel.id));
+    setLimits(prev => prev.map(limit => {
+      if (limit.category === selectedExpenseToCancel.category) {
+        return { ...limit, spent: Math.max(0, limit.spent - selectedExpenseToCancel.amount) };
+      }
+      return limit;
+    }));
+
+    window.dispatchEvent(new CustomEvent('expense:canceled', { detail: selectedExpenseToCancel.id }));
+
+    setIsCanceling(false);
+    setIsCancelDialogOpen(false);
+    setSelectedExpenseToCancel(null);
   };
 
   const handleViewDetails = (expense: Expense) => {
@@ -487,28 +508,7 @@ export function ExpensesPage({ t, language }: ExpensesPageProps) {
                       <th className="text-left py-3 px-4 text-gray-700">{t.expenses.category}</th>
                       <th className="text-left py-3 px-4 text-gray-700">{t.expenses.description}</th>
                       <th className="text-right py-3 px-4 text-gray-700">{t.expenses.amount}</th>
-                      <th
-                        className="text-center py-3 px-4 text-gray-700">{t.expenses.status}
-                        <DropdownMenu>
-                          <DropdownMenuTrigger className="p-2">
-                            <ChevronDown className="w-4 h-4" />
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="center">
-                            <DropdownMenuItem onClick={() => setStatusFilter('all')}>
-                              {t.expenses.allStatus}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setStatusFilter('pending')}>
-                              {t.expenses.statusLabels.pending}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setStatusFilter('approved')}>
-                              {t.expenses.statusLabels.approved}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => setStatusFilter('rejected')}>
-                              {t.expenses.statusLabels.rejected}
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </th>
+                      <th className="text-center py-3 px-4 text-gray-700">{t.expenses.status}</th>
                       <th className="text-center py-3 px-4 text-gray-700">{t.expenses.receipt}</th>
                     </tr>
                   </thead>
@@ -548,18 +548,18 @@ export function ExpensesPage({ t, language }: ExpensesPageProps) {
                                 <Eye className="w-4 h-4 text-gray-600" />
                               </button>
                               <button
-                                onClick={() => isEditable && handleEditExpense(expense)}
+                                onClick={() => isEditable && promptCancelExpense(expense)}
                                 className={
-                                  `p-1 rounded transition-colors ${isEditable ? 
-                                    'hover:bg-gray-200' : 
+                                  `p-1 rounded transition-colors ${isEditable ?
+                                    'hover:bg-gray-200' :
                                     'opacity-50 cursor-not-allowed group'
                                   }`
                                 }
-                                title={isEditable ? t.common.edit : t.expenses.editDisabledTooltip}
+                                title={isEditable ? 'Cancelar envio' : t.expenses.editDisabledTooltip}
                                 aria-disabled={!isEditable}
                                 tabIndex={isEditable ? 0 : -1}
                               >
-                                <Edit className={`w-4 h-4 ${isEditable ? 'text-gray-600' : 'text-gray-400 group-hover:hidden'}`} />
+                                <X className={`w-4 h-4 ${isEditable ? 'text-gray-600' : 'text-gray-400 group-hover:hidden'}`} />
                                 {!isEditable && <Lock className="w-4 h-4 text-gray-600 hidden group-hover:inline" />}
                               </button>
                             </div>
@@ -681,7 +681,7 @@ export function ExpensesPage({ t, language }: ExpensesPageProps) {
                   </Label>
                   <div className="mt-2 space-y-2">
                     <p className="text-sm text-red-900">
-                      <strong>{t.expenses.rejectedBy}:</strong> 
+                      <strong>{t.expenses.rejectedBy}:</strong>
                       {selectedExpenseForDetails.rejectedBy} {'-'} {selectedExpenseForDetails.rejectedByRole === 'manager'
                         ? t.employees.roles.manager
                         : t.employees.roles.finance}
@@ -719,6 +719,31 @@ export function ExpensesPage({ t, language }: ExpensesPageProps) {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Cancel Confirmation Dialog */}
+      <Dialog open={isCancelDialogOpen} onOpenChange={setIsCancelDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Confirmar Cancelamento</DialogTitle>
+            <DialogDescription>
+              Tem certeza que deseja cancelar o envio desta despesa?
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedExpenseToCancel && (
+            <div className="mt-4 space-y-2 text-sm">
+              <p><strong>{t.expenses.date}:</strong> {formatDate(selectedExpenseToCancel.date, language)}</p>
+              <p><strong>{t.expenses.amount}:</strong> USD {selectedExpenseToCancel.amount.toFixed(2)}</p>
+              <p><strong>{t.expenses.description}:</strong> {selectedExpenseToCancel.description}</p>
+            </div>
+          )}
+
+          <div className="flex gap-2 mt-4">
+            <Button variant="outline" className="flex-1" onClick={() => setIsCancelDialogOpen(false)} disabled={isCanceling}>{t.expenses.cancel}</Button>
+            <Button className="flex-1 bg-[#E60000] hover:bg-[#CC0000] text-white" onClick={confirmCancelExpense} disabled={isCanceling}>{isCanceling ? 'Cancelando...' : 'Confirmar Cancelamento'}</Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

@@ -413,8 +413,8 @@ export function ReportsPage({ t, language }: ReportsPageProps) {
                   />
                   <Tooltip content={<CustomTooltip />} />
                   <Legend />
-                  <Bar dataKey="spentPercent" stackId="a" fill="#E60000" name={t.reports.approvedExpensesPercent} />
-                  <Bar dataKey="remainingPercent" stackId="a" fill="#10B981" name={t.reports.remainingBudgetPercent} />
+                  <Bar dataKey="spentPercent" stackId="a" fill="#10B981" name={t.reports.approvedExpensesPercent} />
+                  <Bar dataKey="remainingPercent" stackId="a" fill="#E60000" name={t.reports.remainingBudgetPercent} />
                 </BarChart>
               </ResponsiveContainer>
             </CardContent>
@@ -454,7 +454,7 @@ export function ReportsPage({ t, language }: ReportsPageProps) {
                 {topSpendersLocalized.map((spender, index) => (
                   <div key={index} className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className={`w-8 h-8 rounded-full ${index < 3 ? 'bg-[#E60000]' : 'bg-gray-400'
+                      <div className={`w-8 h-8 rounded-full ${'bg-gray-400'
                         } text-white flex items-center justify-center text-sm font-semibold`}>
                         {index + 1}
                       </div>

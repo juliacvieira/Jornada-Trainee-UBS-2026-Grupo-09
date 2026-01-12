@@ -59,7 +59,7 @@ export default function App() {
         <Route
           path="employees"
           element={
-            <ProtectedRoute allowedRoles={["manager"]}>
+            <ProtectedRoute allowedRoles={["MANAGER"]}>
               <EmployeesPage t={t} />
             </ProtectedRoute>
           }
@@ -68,7 +68,7 @@ export default function App() {
         <Route
           path="approval"
           element={
-            <ProtectedRoute allowedRoles={["manager", "finance"]}>
+            <ProtectedRoute allowedRoles={["MANAGER", "FINANCE"]}>
               <ApprovalPage t={t} language={language} />
             </ProtectedRoute>
           }
@@ -77,7 +77,7 @@ export default function App() {
         <Route
           path="alerts"
           element={
-            <ProtectedRoute allowedRoles={["finance"]}>
+            <ProtectedRoute allowedRoles={["FINANCE"]}>
               <AlertsPage t={t} language={language} />
             </ProtectedRoute>
           }
@@ -86,7 +86,7 @@ export default function App() {
         <Route
           path="reports"
           element={
-            <ProtectedRoute allowedRoles={["finance"]}>
+            <ProtectedRoute allowedRoles={["FINANCE"]}>
               <ReportsPage t={t} language={language} />
             </ProtectedRoute>
           }
