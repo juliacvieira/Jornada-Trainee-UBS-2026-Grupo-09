@@ -99,7 +99,7 @@ public class DepartmentService {
                 departmentId,
                 start,
                 end,
-                com.ubs.expensemanager.domain.enums.ExpenseStatus.APPROVED_FINANCE // ajuste de acordo com seu enum
+                com.ubs.expensemanager.domain.enums.ExpenseStatus.APPROVED_FINANCE
         );
 
         return used != null ? used : BigDecimal.ZERO;
