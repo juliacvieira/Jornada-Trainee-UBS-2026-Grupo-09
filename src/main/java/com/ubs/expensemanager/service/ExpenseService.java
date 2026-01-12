@@ -36,12 +36,14 @@ public class ExpenseService {
     public ExpenseService(ExpenseRepository expenseRepository,
             EmployeeRepository employeeRepository,
             CategoryRepository categoryRepository,
-            AlertService alertService) {
-		this.expenseRepository = expenseRepository;
-		this.employeeRepository = employeeRepository;
-		this.categoryRepository = categoryRepository;
+            AlertService alertService,
+            ReceiptStorageService receiptStorageService) {
+        this.expenseRepository = expenseRepository;
+        this.employeeRepository = employeeRepository;
+        this.categoryRepository = categoryRepository;
+        this.alertService = alertService;
         this.receiptStorageService = receiptStorageService;
-	}
+    }
 
     @Transactional
     public Expense createExpense(CreateExpenseRequest request) {
@@ -124,25 +126,25 @@ public class ExpenseService {
                     "Monthly category limit exceeded");
         }
 
-        // department budget considering the the already approved expenses
+        // department budget considering the already approved expenses
         Employee employee = expense.getEmployee();
-        if (alreadySpent.add(amount).compareTo(department.getMonthlyBudget()) > 0) {
-            expense.setNeedsReview(true);
-            alertService.createAlert(expense, com.ubs.expensemanager.domain.enums.AlertType.DEPARTMENT_BUDGET,
-                    "Department monthly budget exceeded");
-        }
+        Department department = employee != null ? employee.getDepartment() : null;
+        if (department != null && department.getMonthlyBudget() != null) {
+            YearMonth ym = YearMonth.from(expense.getDate());
+            LocalDate start = ym.atDay(1);
+            LocalDate end = ym.atEndOfMonth();
 
-        YearMonth ym = YearMonth.from(expense.getDate());
-        LocalDate start = ym.atDay(1);
-        LocalDate end = ym.atEndOfMonth();
+            BigDecimal alreadySpent = expenseRepository.sumAmountByDepartmentAndMonth(
+                department.getId(), start, end, ExpenseStatus.APPROVED_FINANCE);
 
-        BigDecimal alreadySpent = expenseRepository.sumAmountByDepartmentAndMonth(
-            department.getId(), start, end, ExpenseStatus.APPROVED_FINANCE);
+            if (alreadySpent == null) alreadySpent = BigDecimal.ZERO;
 
-        if (alreadySpent == null) alreadySpent = BigDecimal.ZERO;
-
-        if (alreadySpent.add(amount).compareTo(department.getMonthlyBudget()) > 0) {
-            throw new BusinessException("Department monthly budget exceeded");
+            if (alreadySpent.add(amount).compareTo(department.getMonthlyBudget()) > 0) {
+                expense.setNeedsReview(true);
+                alertService.createAlert(expense, com.ubs.expensemanager.domain.enums.AlertType.DEPARTMENT_BUDGET,
+                        "Department monthly budget exceeded");
+                throw new BusinessException("Department monthly budget exceeded");
+            }
         }
     }
 
