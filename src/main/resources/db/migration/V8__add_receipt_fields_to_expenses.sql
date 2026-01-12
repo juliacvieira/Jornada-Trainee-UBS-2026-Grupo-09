@@ -1,0 +1,5 @@
+ALTER TABLE expenses
+ADD COLUMN IF NOT EXISTS receipt_url VARCHAR(255);
+
+ALTER TABLE expenses
+ADD COLUMN IF NOT EXISTS receipt_filename VARCHAR(255);
