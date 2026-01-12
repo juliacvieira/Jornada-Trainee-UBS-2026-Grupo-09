@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { AlertTriangle, CheckCircle, AlertCircle, Search } from 'lucide-react';
+import { AlertTriangle, CheckCircle, AlertCircle, Search, Download, FileText } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { Button } from '../components/ui/button';
 import { Textarea } from '../components/ui/textarea';
@@ -34,6 +34,7 @@ interface Alert {
   resolvedBy?: string;
   resolvedAt?: string;
   resolveNote?: string;
+  receipt?: string;
 }
 
 // Mock data - switch for real data integration
@@ -46,6 +47,7 @@ const mockActiveAlerts: Alert[] = [
     amount: 1200,
     triggeredAt: '2025-12-24T10:30:00',
     status: 'active',
+    receipt: 'https://via.placeholder.com/800x1000.png?text=Alert+Receipt+1',
   },
   {
     id: '2',
@@ -55,6 +57,7 @@ const mockActiveAlerts: Alert[] = [
     amount: 450,
     triggeredAt: '2025-12-24T14:15:00',
     status: 'active',
+    receipt: 'https://via.placeholder.com/800x600.png?text=Alert+Receipt+2',
   },
   {
     id: '3',
@@ -64,6 +67,7 @@ const mockActiveAlerts: Alert[] = [
     amount: 3200,
     triggeredAt: '2025-12-23T09:00:00',
     status: 'active',
+    receipt: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
   },
   {
     id: '4',
@@ -73,6 +77,7 @@ const mockActiveAlerts: Alert[] = [
     amount: 85.50,
     triggeredAt: '2025-12-25T11:20:00',
     status: 'active',
+    receipt: 'https://via.placeholder.com/800x600.png?text=Alert+Receipt+4',
   },
 ];
 
@@ -88,6 +93,7 @@ const mockResolvedAlerts: Alert[] = [
     resolvedBy: 'Julia Oliveira',
     resolvedAt: '2025-12-21T10:00:00',
     resolveNote: 'Approved on an exceptional basis due to urgent travel for a client.',
+    receipt: 'https://via.placeholder.com/800x600.png?text=Resolved+Receipt+5',
   },
   {
     id: '6',
@@ -100,6 +106,7 @@ const mockResolvedAlerts: Alert[] = [
     resolvedBy: 'Ana Costa',
     resolvedAt: '2025-12-20T09:30:00',
     resolveNote: 'Employee provided detailed description. Approved.',
+    receipt: 'https://via.placeholder.com/800x600.png?text=Resolved+Receipt+6',
   },
 ];
 
@@ -111,6 +118,20 @@ export function AlertsPage({ t, language }: AlertsPageProps) {
   const [resolvedSearch, setResolvedSearch] = useState('');
   const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null);
   const [resolveNote, setResolveNote] = useState('');
+  const [selectedAlertReceiptUrl, setSelectedAlertReceiptUrl] = useState<string | null>(null);
+  const [selectedAlertReceiptName, setSelectedAlertReceiptName] = useState<string | null>(null);
+  const [selectedDetailsAlert, setSelectedDetailsAlert] = useState<Alert | null>(null);
+
+  const handleViewReceipt = (alertId: string) => {
+    const all = [...activeAlerts, ...resolvedAlerts];
+    const a = all.find(x => x.id === alertId);
+    if (!a || !a.receipt) {
+      alert('Comprovante não encontrado.');
+      return;
+    }
+    setSelectedAlertReceiptUrl(a.receipt);
+    setSelectedAlertReceiptName(`alert-receipt-${a.id}`);
+  };
 
   // Filter functions
   const filterAlerts = (alerts: Alert[], query: string) => {
@@ -142,6 +163,10 @@ export function AlertsPage({ t, language }: AlertsPageProps) {
   const handleCancelResolve = () => {
     setSelectedAlert(null);
     setResolveNote('');
+  };
+
+  const handleViewDetails = (alert: Alert) => {
+    setSelectedDetailsAlert(alert);
   };
 
   const getAlertTypeColor = (type: Alert['type']) => {
@@ -184,6 +209,7 @@ export function AlertsPage({ t, language }: AlertsPageProps) {
                 <>
                   <th className="text-left py-3 px-4 text-gray-700">{t.approval.reviewedBy}</th>
                   <th className="text-left py-3 px-4 text-gray-700">{t.alerts.resolveNote}</th>
+                  <th className="text-center py-3 px-4 text-gray-700">{t.expenses.actions}</th>
                 </>
               )}
               {showActions && (
@@ -225,11 +251,33 @@ export function AlertsPage({ t, language }: AlertsPageProps) {
                       <td className="py-3 px-4 text-gray-700 max-w-xs truncate">
                         {alert.resolveNote || '-'}
                       </td>
+                      <td className="py-3 px-4">
+                        <div className="flex items-center justify-center">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="border-gray-300 text-gray-700 hover:bg-gray-50"
+                            onClick={() => handleViewDetails(alert)}
+                          >
+                            <Search className="w-4 h-4 mr-1" />
+                            {t.expenses.viewDetails}
+                          </Button>
+                        </div>
+                      </td>
                     </>
                   )}
                   {showActions && (
                     <td className="py-3 px-4">
-                      <div className="flex items-center justify-center">
+                      <div className="flex items-center justify-center gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="border-gray-300 text-gray-700 hover:bg-gray-50"
+                          onClick={() => handleViewDetails(alert)}
+                        >
+                          <Search className="w-4 h-4 mr-1" />
+                          {t.expenses.viewDetails}
+                        </Button>
                         <Button
                           size="sm"
                           className="bg-[#E60000] hover:bg-[#CC0000] text-white"
@@ -341,6 +389,46 @@ export function AlertsPage({ t, language }: AlertsPageProps) {
         </Tabs>
       </div>
 
+      {/* Alert Details Dialog */}
+      <Dialog open={!!selectedDetailsAlert} onOpenChange={(open) => !open && setSelectedDetailsAlert(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>{t.alerts.dialogueTitle}</DialogTitle>
+            <DialogDescription>
+              {selectedDetailsAlert && (
+                <div className="mt-4 space-y-2 text-sm">
+                  <p><strong>{t.alerts.type}:</strong> {t.alerts.types[selectedDetailsAlert.type as keyof typeof t.alerts.types]}</p>
+                  <p><strong>{t.approval.employee}:</strong> {selectedDetailsAlert.employeeName}</p>
+                  <p><strong>{t.alerts.message}:</strong> {selectedDetailsAlert.message}</p>
+                  {selectedDetailsAlert.amount && (
+                    <p><strong>{t.expenses.amount}:</strong> USD {selectedDetailsAlert.amount.toFixed(2)}</p>
+                  )}
+                  <p><strong>{t.alerts.triggered}:</strong> {formatDate(selectedDetailsAlert.triggeredAt, language)}</p>
+                  <p><strong>{t.alerts.resolveNote}:</strong> {selectedDetailsAlert.resolveNote || '-'}</p>
+                  <p><strong>{t.alerts.resolved_}:</strong> {selectedDetailsAlert.resolvedBy || '-'}</p>
+                  {selectedDetailsAlert.resolvedAt && (
+                    <p><strong>{t.alerts.resolvedIn}</strong> {formatDate(selectedDetailsAlert.resolvedAt, language)}</p>
+                  )}
+                  {selectedDetailsAlert.receipt && (
+                    <p>
+                      <strong>{t.expenses.receipt}:</strong>
+                      <Button size="sm" variant="outline" className="ml-2" onClick={() => handleViewReceipt(selectedDetailsAlert.id)}>
+                        <FileText className="w-4 h-4 mr-1" />
+                        {t.approval.viewReceipt}
+                      </Button>
+                    </p>
+                  )}
+                </div>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="flex gap-2">
+            <Button variant="outline" className="flex-1" onClick={() => setSelectedDetailsAlert(null)}>{t.common.close}</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Resolve Dialog */}
       <Dialog open={!!selectedAlert} onOpenChange={(open) => !open && handleCancelResolve()}>
         <DialogContent className="max-w-md">
@@ -387,6 +475,34 @@ export function AlertsPage({ t, language }: AlertsPageProps) {
             >
               {t.alerts.resolve}
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Alert Receipt Viewer Dialog */}
+      <Dialog open={!!selectedAlertReceiptUrl} onOpenChange={(open) => !open && setSelectedAlertReceiptUrl(null)}>
+        <DialogContent className="max-w-3xl">
+          <div className="flex gap-4">
+            <div className="flex-1">
+              {selectedAlertReceiptUrl?.toLowerCase().endsWith('.pdf') ? (
+                <object data={selectedAlertReceiptUrl} type="application/pdf" width="100%" height="600">
+                  <p>PDF not supported.
+                    <a href={selectedAlertReceiptUrl} target="_blank" rel="noreferrer">Open in new window</a>
+                  </p>
+                </object>
+              ) : (
+                <img src={selectedAlertReceiptUrl!} alt={selectedAlertReceiptName ?? 'Comprovante'} className="max-h-[70vh] w-full object-contain" />
+              )}
+            </div>
+            <div className="flex flex-col items-start gap-2">
+              <a href={selectedAlertReceiptUrl ?? '#'} download className="w-full">
+                <Button className="w-full" variant="outline">
+                  <Download className="w-4 h-4 mr-2" />
+                  {t.expenses.downloadReceipt}
+                </Button>
+              </a>
+              <Button variant="outline" onClick={() => setSelectedAlertReceiptUrl(null)}>{t.common.close}</Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>

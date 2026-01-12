@@ -131,6 +131,8 @@ export const translations = {
       resolve: 'Resolver',
       resolved_: 'Resolvido',
       searchPlaceholder: 'Buscar alertas...',
+      dialogueTitle: 'Detalhes do Alerta',
+      resolvedIn: 'Resolvido em:',
       types: {
         limit_exceeded: 'Limite Excedido',
         pending_approval: 'Aprovação Pendente',
@@ -351,6 +353,8 @@ export const translations = {
       resolve: 'Resolve',
       resolved_: 'Resolved',
       searchPlaceholder: 'Search alerts...',
+      dialogueTitle: 'Alert Details',
+      resolvedIn: 'Resolved in',
       types: {
         limit_exceeded: 'Limit Exceeded',
         pending_approval: 'Pending Approval',

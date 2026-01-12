@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { CheckCircle, XCircle, Clock, FileText, Search, Download } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { Button } from '../components/ui/button';
@@ -36,6 +36,7 @@ const mockPendingExpenses: Expense[] = [
     date: '2025-12-20',
     description: 'Airfare to São Paulo - Technology Conference',
     status: 'pending',
+    receipt: 'https://via.placeholder.com/800x1000.png?text=Comprovante+1',
   },
   {
     id: '2',
@@ -45,6 +46,7 @@ const mockPendingExpenses: Expense[] = [
     date: '2025-12-22',
     description: 'Dinner with potential client - Project discussion',
     status: 'pending',
+    receipt: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf',
   },
   {
     id: '3',
@@ -54,6 +56,7 @@ const mockPendingExpenses: Expense[] = [
     date: '2025-12-23',
     description: 'Taxi for urgent meeting with client',
     status: 'pending',
+    receipt: 'https://via.placeholder.com/800x600.png?text=Comprovante+3',
   },
 ];
 
@@ -66,6 +69,7 @@ const mockApprovedExpenses: Expense[] = [
     date: '2025-12-15',
     description: 'Executive lunch',
     status: 'financeApproved',
+    receipt: 'https://via.placeholder.com/800x600.png?text=Comprovante+4',
   },
   {
     id: '5',
@@ -75,6 +79,7 @@ const mockApprovedExpenses: Expense[] = [
     date: '2025-12-18',
     description: 'Uber for client office',
     status: 'financeApproved',
+    receipt: 'https://via.placeholder.com/800x600.png?text=Comprovante+5',
   },
 ];
 
@@ -87,14 +92,28 @@ const mockRejectedExpenses: Expense[] = [
     date: '2025-12-16',
     description: 'Dinner at the restaurant',
     status: 'rejected',
+    receipt: 'https://via.placeholder.com/800x600.png?text=Comprovante+6',
   },
 ];
 
 export function ApprovalPage({ t, language }: ApprovalPageProps) {
   const { user } = useAuth();
-  const [pendingExpenses] = useState<Expense[]>(mockPendingExpenses);
+  const [pendingExpenses, setPendingExpenses] = useState<Expense[]>(mockPendingExpenses);
   const [approvedExpenses] = useState<Expense[]>(mockApprovedExpenses);
   const [rejectedExpenses] = useState<Expense[]>(mockRejectedExpenses);
+
+  useEffect(() => {
+    const onCanceled = (e: Event) => {
+      // CustomEvent detail contains the canceled expense id
+      const custom = e as CustomEvent<string>;
+      const canceledId = custom.detail;
+      setPendingExpenses(prev => prev.filter(p => p.id !== canceledId));
+      setSelectedPendingIds(prev => prev.filter(x => x !== canceledId));
+    };
+
+    window.addEventListener('expense:canceled', onCanceled as EventListener);
+    return () => window.removeEventListener('expense:canceled', onCanceled as EventListener);
+  }, []);
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
   const [actionType, setActionType] = useState<'approve' | 'reject' | null>(null);
   const [rejectionReason, setRejectionReason] = useState('');
@@ -102,6 +121,8 @@ export function ApprovalPage({ t, language }: ApprovalPageProps) {
   const [historyFilter, setHistoryFilter] = useState<string>('approved'); // Changed default to 'approved'
   const [selectedPendingIds, setSelectedPendingIds] = useState<string[]>([]);
   const [selectedHistoryIds, setSelectedHistoryIds] = useState<string[]>([]);
+  const [selectedReceiptUrl, setSelectedReceiptUrl] = useState<string | null>(null);
+  const [selectedReceiptName, setSelectedReceiptName] = useState<string | null>(null);
 
   if (!user) return null;
 
@@ -130,9 +151,14 @@ export function ApprovalPage({ t, language }: ApprovalPageProps) {
   };
 
   const handleViewReceipt = (expenseId: string) => {
-    // Mock view receipt - in real app, this would open the receipt
-    console.log('Viewing receipt for expense:', expenseId);
-    alert('Abrindo comprovante...');
+    const all = [...pendingExpenses, ...approvedExpenses, ...rejectedExpenses];
+    const expense = all.find(e => e.id === expenseId);
+    if (!expense || !expense.receipt) {
+      alert('Comprovante não encontrado.');
+      return;
+    }
+    setSelectedReceiptUrl(expense.receipt);
+    setSelectedReceiptName(`comprovante-${expense.id}`);
   };
 
   const handleToggleSelectPending = (id: string) => {
@@ -476,6 +502,32 @@ export function ApprovalPage({ t, language }: ApprovalPageProps) {
             >
               {actionType === 'approve' ? t.approval.approve : t.approval.reject}
             </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Receipt Viewer Dialog */}
+      <Dialog open={!!selectedReceiptUrl} onOpenChange={(open) => !open && setSelectedReceiptUrl(null)}>
+        <DialogContent className="max-w-3xl">
+          <div className="flex gap-4">
+            <div className="flex-1">
+              {selectedReceiptUrl?.toLowerCase().endsWith('.pdf') ? (
+                <object data={selectedReceiptUrl} type="application/pdf" width="100%" height="600">
+                  <p>PDF não suportado. <a href={selectedReceiptUrl} target="_blank" rel="noreferrer">Abrir em nova aba</a></p>
+                </object>
+              ) : (
+                <img src={selectedReceiptUrl!} alt={selectedReceiptName ?? 'Comprovante'} className="max-h-[70vh] w-full object-contain" />
+              )}
+            </div>
+            <div className="flex flex-col items-start gap-2">
+              <a href={selectedReceiptUrl ?? '#'} download className="w-full">
+                <Button className="w-full" variant="outline">
+                  <Download className="w-4 h-4 mr-2" />
+                  {t.expenses.downloadReceipt}
+                </Button>
+              </a>
+              <Button variant="outline" onClick={() => setSelectedReceiptUrl(null)}>{t.common.close}</Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>

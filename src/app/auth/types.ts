@@ -1,4 +1,4 @@
-export type UserRole = "employee" | "manager" | "finance"
+export type UserRole = "EMPLOYEE" | "MANAGER" | "FINANCE"
 
 export interface User {
   email: string
