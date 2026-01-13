@@ -31,45 +31,45 @@ public class ExpenseController {
     private final ExpenseService service;
     private final ExpenseMapper mapper;
 
-    public ExpenseController(ExpenseService service, ExpenseMapper mapper){
+    public ExpenseController(ExpenseService service, ExpenseMapper mapper) {
         this.service = service;
         this.mapper = mapper;
     }
 
     @GetMapping
-    public List<ExpenseResponse> getExpenses(){
+    public List<ExpenseResponse> getExpenses() {
         List<Expense> expenses = service.findAll();
         return mapper.toResponseList(expenses);
     }
 
     @GetMapping("/{id}")
-    public ExpenseResponse getExpensesById(@PathVariable UUID id){
-        Expense expense =  service.findById(id);
-        return mapper.toResponse(expense);
+    public ExpenseResponse getExpensesById(@PathVariable UUID id) {
+        Expense expense = service.findById(id);
+        return ExpenseMapper.toResponse(expense);
     }
 
     @PostMapping
-    public ExpenseResponse newExpense(@RequestBody CreateExpenseRequest request){
+    public ExpenseResponse newExpense(@RequestBody CreateExpenseRequest request) {
         Expense expense = service.createExpense(request);
-        return mapper.toResponse(expense);
+        return ExpenseMapper.toResponse(expense);
     }
 
     @PatchMapping("/{id}")
-    public ExpenseResponse updateExpense(@PathVariable UUID id, @RequestBody UpdateExpenseRequest request){
+    public ExpenseResponse updateExpense(@PathVariable UUID id, @RequestBody UpdateExpenseRequest request) {
         Expense expense = service.updateExpense(id, request);
-        return mapper.toResponse(expense);
+        return ExpenseMapper.toResponse(expense);
     }
 
     @PostMapping("/{id}/receipt")
     public ExpenseResponse uploadReceipt(
             @PathVariable UUID id,
-            @RequestParam("file") MultipartFile file
-    ) {
+            @RequestParam("file") MultipartFile file) {
         Expense updated = service.attachReceipt(id, file);
-        return mapper.toResponse(updated);
+        return ExpenseMapper.toResponse(updated);
     }
 
     @GetMapping("/{id}/receipt")
+    @SuppressWarnings("null")
     public ResponseEntity<Resource> downloadReceipt(@PathVariable UUID id) {
         Resource resource = service.loadReceipt(id);
 
@@ -84,5 +84,4 @@ public class ExpenseController {
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .body(resource);
     }
-
 }

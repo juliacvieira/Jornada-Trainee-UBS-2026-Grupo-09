@@ -43,6 +43,7 @@ public class AlertService {
     }
 
     @Transactional
+    @SuppressWarnings("null")
     public Alert resolve(UUID id) {
         Alert alert = repository.findById(id)
                 .orElseThrow(() -> new BusinessException("Alert not found"));

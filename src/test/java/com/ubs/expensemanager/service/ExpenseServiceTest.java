@@ -7,7 +7,6 @@ import com.ubs.expensemanager.domain.Expense;
 import com.ubs.expensemanager.domain.enums.AlertType;
 import com.ubs.expensemanager.domain.enums.ExpenseStatus;
 import com.ubs.expensemanager.dto.expense.CreateExpenseRequest;
-import com.ubs.expensemanager.exception.BusinessException;
 import com.ubs.expensemanager.repository.CategoryRepository;
 import com.ubs.expensemanager.repository.EmployeeRepository;
 import com.ubs.expensemanager.repository.ExpenseRepository;
@@ -53,6 +52,7 @@ class ExpenseServiceTest {
     }
 
     @Test
+    @SuppressWarnings("null")
     void createExpense_whenExceedsDailyCategoryLimit_shouldMarkNeedsReviewAndCreateAlert() {
         // given
         UUID employeeId = UUID.randomUUID();
@@ -66,11 +66,16 @@ class ExpenseServiceTest {
         when(request.currency()).thenReturn("BRL");
         when(request.description()).thenReturn("Almoço executivo");
 
+        Department dept = new Department();
+        dept.setId(UUID.randomUUID());
+        dept.setName("Vendas");
+        dept.setMonthlyBudget(BigDecimal.valueOf(5000));
+
         Employee employee = new Employee();
         employee.setId(employeeId);
         employee.setName("João");
         employee.setEmail("joao@ubs.com");
-        // department left null so department budget path is not executed
+        employee.setDepartment(dept);
 
         Category category = new Category();
         category.setId(categoryId);
@@ -81,12 +86,12 @@ class ExpenseServiceTest {
         when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(employee));
         when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
 
-        // emulate repository save (set id)
-        when(expenseRepository.save(any(Expense.class))).thenAnswer(invocation -> {
-            Expense e = invocation.getArgument(0);
-            if (e.getId() == null) e.setId(UUID.randomUUID());
-            return e;
-        });
+        // Mock department budget check (should not exceed)
+        when(expenseRepository.sumAmountByDepartmentAndMonth(eq(dept.getId()), any(LocalDate.class),
+                any(LocalDate.class), eq(ExpenseStatus.APPROVED_FINANCE)))
+                .thenReturn(BigDecimal.valueOf(100));
+
+        when(expenseRepository.save(any(Expense.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         // when
         Expense result = expenseService.createExpense(request);
@@ -100,7 +105,8 @@ class ExpenseServiceTest {
     }
 
     @Test
-    void createExpense_whenDepartmentBudgetExceeded_shouldCreateAlertAndThrowBusinessException() {
+    @SuppressWarnings("null")
+    void createExpense_whenDepartmentBudgetExceeded_shouldCreateAlertAndMarkNeedsReview() {
         // given
         UUID employeeId = UUID.randomUUID();
         UUID categoryId = UUID.randomUUID();
@@ -132,21 +138,28 @@ class ExpenseServiceTest {
         when(employeeRepository.findById(employeeId)).thenReturn(Optional.of(employee));
         when(categoryRepository.findById(categoryId)).thenReturn(Optional.of(category));
 
-        // sumAmountByDepartmentAndMonth(...) will be called inside validateExpenseForCreate
-        when(expenseRepository.sumAmountByDepartmentAndMonth(eq(dept.getId()), any(LocalDate.class), any(LocalDate.class), eq(ExpenseStatus.APPROVED_FINANCE)))
+        // sumAmountByDepartmentAndMonth(...) will be called inside
+        // validateExpenseForCreate
+        when(expenseRepository.sumAmountByDepartmentAndMonth(eq(dept.getId()), any(LocalDate.class),
+                any(LocalDate.class), eq(ExpenseStatus.APPROVED_FINANCE)))
                 .thenReturn(BigDecimal.valueOf(200));
 
         when(expenseRepository.save(any(Expense.class))).thenAnswer(invocation -> {
             Expense e = invocation.getArgument(0);
-            if (e.getId() == null) e.setId(UUID.randomUUID());
+            if (e.getId() == null)
+                e.setId(UUID.randomUUID());
             return e;
         });
 
-        // when / then
-        BusinessException ex = assertThrows(BusinessException.class, () -> expenseService.createExpense(request));
-        assertTrue(ex.getMessage().toLowerCase().contains("department"));
+        // when
+        Expense result = expenseService.createExpense(request);
 
-        // alert should be created before exception is thrown
+        // then
+        assertNotNull(result);
+        assertEquals(ExpenseStatus.PENDING, result.getStatus());
+        assertTrue(result.isNeedsReview(), "Expense exceeding department budget should be marked needsReview");
+
+        // alert should be created
         verify(alertService, times(1)).createAlert(any(Expense.class), eq(AlertType.DEPARTMENT_BUDGET), anyString());
     }
 }

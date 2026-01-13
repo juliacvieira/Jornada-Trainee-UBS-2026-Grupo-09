@@ -35,6 +35,7 @@ class DepartmentServiceTest {
     }
 
     @Test
+    @SuppressWarnings("null")
     void createDepartment_whenValid_shouldSaveAndReturn() {
         // given
         Department d = new Department();
@@ -44,12 +45,14 @@ class DepartmentServiceTest {
 
         when(departmentRepository.save(any(Department.class))).thenAnswer(invocation -> {
             Department arg = invocation.getArgument(0);
-            if (arg.getId() == null) arg.setId(UUID.randomUUID());
+            if (arg.getId() == null)
+                arg.setId(UUID.randomUUID());
             return arg;
         });
 
         // when
-        com.ubs.expensemanager.dto.department.CreateDepartmentRequest req = mock(com.ubs.expensemanager.dto.department.CreateDepartmentRequest.class);
+        com.ubs.expensemanager.dto.department.CreateDepartmentRequest req = mock(
+                com.ubs.expensemanager.dto.department.CreateDepartmentRequest.class);
         when(req.name()).thenReturn("TI");
         when(req.monthlyBudget()).thenReturn(BigDecimal.valueOf(10000));
 
@@ -64,7 +67,8 @@ class DepartmentServiceTest {
 
     @Test
     void createDepartment_whenInvalidName_shouldThrow() {
-        com.ubs.expensemanager.dto.department.CreateDepartmentRequest req = mock(com.ubs.expensemanager.dto.department.CreateDepartmentRequest.class);
+        com.ubs.expensemanager.dto.department.CreateDepartmentRequest req = mock(
+                com.ubs.expensemanager.dto.department.CreateDepartmentRequest.class);
         when(req.name()).thenReturn("   ");
         when(req.monthlyBudget()).thenReturn(BigDecimal.valueOf(1000));
 
@@ -73,6 +77,7 @@ class DepartmentServiceTest {
     }
 
     @Test
+    @SuppressWarnings("null")
     void updateDepartment_whenReducingBudgetAndAlreadySpentExceedsNewBudget_shouldThrow() {
         UUID deptId = UUID.randomUUID();
 
@@ -83,7 +88,8 @@ class DepartmentServiceTest {
 
         when(departmentRepository.findById(deptId)).thenReturn(Optional.of(existing));
 
-        com.ubs.expensemanager.dto.department.UpdateDepartmentRequest req = mock(com.ubs.expensemanager.dto.department.UpdateDepartmentRequest.class);
+        com.ubs.expensemanager.dto.department.UpdateDepartmentRequest req = mock(
+                com.ubs.expensemanager.dto.department.UpdateDepartmentRequest.class);
         when(req.name()).thenReturn("Comercial");
         when(req.monthlyBudget()).thenReturn(BigDecimal.valueOf(1000)); // reduce budget
 
@@ -93,16 +99,20 @@ class DepartmentServiceTest {
         when(expenseRepository.sumAmountByDepartmentAndMonth(eq(existing.getId()), eq(start), eq(end), any()))
                 .thenReturn(BigDecimal.valueOf(2000));
 
-        BusinessException ex = assertThrows(BusinessException.class, () -> departmentService.updateDepartment(deptId, req));
-        assertTrue(ex.getMessage().toLowerCase().contains("cannot reduce budget") || ex.getMessage().toLowerCase().contains("exceeds new monthly budget"));
+        BusinessException ex = assertThrows(BusinessException.class,
+                () -> departmentService.updateDepartment(deptId, req));
+        assertTrue(ex.getMessage().toLowerCase().contains("cannot reduce budget")
+                || ex.getMessage().toLowerCase().contains("exceeds new monthly budget"));
     }
 
     @Test
+    @SuppressWarnings("null")
     void updateDepartment_whenNotFound_shouldThrow404() {
         UUID deptId = UUID.randomUUID();
         when(departmentRepository.findById(deptId)).thenReturn(Optional.empty());
 
-        com.ubs.expensemanager.dto.department.UpdateDepartmentRequest req = mock(com.ubs.expensemanager.dto.department.UpdateDepartmentRequest.class);
+        com.ubs.expensemanager.dto.department.UpdateDepartmentRequest req = mock(
+                com.ubs.expensemanager.dto.department.UpdateDepartmentRequest.class);
         when(req.name()).thenReturn("Ops");
         when(req.monthlyBudget()).thenReturn(BigDecimal.valueOf(1000));
 

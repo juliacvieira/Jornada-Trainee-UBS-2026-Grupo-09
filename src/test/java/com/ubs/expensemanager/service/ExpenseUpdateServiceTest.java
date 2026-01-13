@@ -35,6 +35,7 @@ class ExpenseUpdateServiceTest {
     }
 
     @Test
+    @SuppressWarnings("null")
     void updateExpense_whenExcludingMonthSumExceedsBudget_shouldThrow() {
         // existing expense (that will be excluded from the month sum)
         UUID expenseId = UUID.randomUUID();
@@ -69,15 +70,19 @@ class ExpenseUpdateServiceTest {
         when(req.currency()).thenReturn("BRL");
         when(req.description()).thenReturn("Táxi");
 
-        // sum excluding this expense: alreadySpentExcluding = 200 => 200 + 900 = 1100 > 1000 => should throw
-        when(expenseRepository.sumAmountByDepartmentAndMonthExcluding(eq(dept.getId()), any(LocalDate.class), any(LocalDate.class), eq(ExpenseStatus.APPROVED_FINANCE), eq(existing.getId())))
+        // sum excluding this expense: alreadySpentExcluding = 200 => 200 + 900 = 1100 >
+        // 1000 => should throw
+        when(expenseRepository.sumAmountByDepartmentAndMonthExcluding(eq(dept.getId()), any(LocalDate.class),
+                any(LocalDate.class), eq(ExpenseStatus.APPROVED_FINANCE), eq(existing.getId())))
                 .thenReturn(BigDecimal.valueOf(200));
 
-        BusinessException ex = assertThrows(BusinessException.class, () -> expenseService.updateExpense(expenseId, req));
+        BusinessException ex = assertThrows(BusinessException.class,
+                () -> expenseService.updateExpense(expenseId, req));
         assertTrue(ex.getMessage().toLowerCase().contains("budget"));
     }
 
     @Test
+    @SuppressWarnings("null")
     void updateExpense_whenWithinBudget_shouldSaveAndReturnUpdated() {
         UUID expenseId = UUID.randomUUID();
         Expense existing = new Expense();
@@ -92,12 +97,11 @@ class ExpenseUpdateServiceTest {
         existing.setDate(LocalDate.now());
         existing.setStatus(ExpenseStatus.PENDING);
 
-        when(expenseRepository.findById(expenseId)).thenReturn(Optional.of(existing));
-
         Category category = new Category();
         category.setId(UUID.randomUUID());
         category.setName("Outros");
         when(categoryRepository.findById(category.getId())).thenReturn(Optional.of(category));
+        when(expenseRepository.findById(expenseId)).thenReturn(Optional.of(existing));
 
         UpdateExpenseRequest req = mock(UpdateExpenseRequest.class);
         when(req.categoryId()).thenReturn(category.getId());
@@ -106,7 +110,8 @@ class ExpenseUpdateServiceTest {
         when(req.currency()).thenReturn("BRL");
         when(req.description()).thenReturn("Material");
 
-        when(expenseRepository.sumAmountByDepartmentAndMonthExcluding(eq(dept.getId()), any(LocalDate.class), any(LocalDate.class), eq(ExpenseStatus.APPROVED_FINANCE), eq(existing.getId())))
+        when(expenseRepository.sumAmountByDepartmentAndMonthExcluding(eq(dept.getId()), any(LocalDate.class),
+                any(LocalDate.class), eq(ExpenseStatus.APPROVED_FINANCE), eq(existing.getId())))
                 .thenReturn(BigDecimal.valueOf(1000)); // 1000 + 400 = 1400 <= 5000
 
         when(expenseRepository.save(any(Expense.class))).thenAnswer(invocation -> invocation.getArgument(0));

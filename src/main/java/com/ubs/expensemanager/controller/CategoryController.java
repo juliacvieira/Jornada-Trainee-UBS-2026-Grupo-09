@@ -22,28 +22,26 @@ import com.ubs.expensemanager.service.CategoryService;
 public class CategoryController {
 
     private final CategoryService service;
-    private final CategoryMapper mapper;
 
-    public CategoryController (CategoryService service, CategoryMapper mapper){
+    public CategoryController(CategoryService service) {
         this.service = service;
-        this.mapper = mapper;
     }
 
     @GetMapping("/{id}")
-    public CategoryResponse getCategory(@PathVariable UUID id){
+    public CategoryResponse getCategory(@PathVariable UUID id) {
         Category category = service.findById(id);
-        return mapper.toResponse(category); 
+        return CategoryMapper.toResponse(category);
     }
 
     @PostMapping
-    public CategoryResponse newCategory(@RequestBody CreateCategoryRequest request){
+    public CategoryResponse newCategory(@RequestBody CreateCategoryRequest request) {
         Category category = service.createCategory(request);
-        return mapper.toResponse(category);
+        return CategoryMapper.toResponse(category);
     }
 
     @PatchMapping("/{id}")
-    public CategoryResponse updateCategory (@PathVariable UUID id, @RequestBody UpdateCategoryRequest request){
+    public CategoryResponse updateCategory(@PathVariable UUID id, @RequestBody UpdateCategoryRequest request) {
         Category category = service.updateCategory(id, request);
-        return mapper.toResponse(category);
+        return CategoryMapper.toResponse(category);
     }
 }

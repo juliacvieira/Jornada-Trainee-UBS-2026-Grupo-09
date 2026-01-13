@@ -30,14 +30,15 @@ public class EmployeeService {
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
 
     public EmployeeService(EmployeeRepository employeeRepository,
-                           DepartmentRepository departmentRepository,
-                           ExpenseRepository expenseRepository) {
+            DepartmentRepository departmentRepository,
+            ExpenseRepository expenseRepository) {
         this.employeeRepository = employeeRepository;
         this.departmentRepository = departmentRepository;
         this.expenseRepository = expenseRepository;
     }
 
     @Transactional
+    @SuppressWarnings("null")
     public Employee createEmployee(CreateEmployeeRequest req) {
         validateEmployeeFields(req.name(), req.email(), req.position());
 
@@ -58,16 +59,18 @@ public class EmployeeService {
 
         if (req.departmentId() != null) {
             Department dept = departmentRepository.findById(req.departmentId())
-                .orElseThrow(() -> new BusinessException("Department not found"));
+                    .orElseThrow(() -> new BusinessException("Department not found"));
             e.setDepartment(dept);
         }
 
         if (req.managerId() != null) {
             Employee manager = employeeRepository.findById(req.managerId())
-                .orElseThrow(() -> new BusinessException("Manager not found"));
+                    .orElseThrow(() -> new BusinessException("Manager not found"));
             // prevent self-manager
-            // (managerId should not equal the new employee id — here new employee has no id yet)
-            // additional check: manager != subordinate cycles could be checked in update time
+            // (managerId should not equal the new employee id — here new employee has no id
+            // yet)
+            // additional check: manager != subordinate cycles could be checked in update
+            // time
             e.setManager(manager);
         }
 
@@ -79,9 +82,10 @@ public class EmployeeService {
     }
 
     @Transactional
+    @SuppressWarnings("null")
     public Employee updateEmployee(UUID id, UpdateEmployeeRequest req) {
         Employee existing = employeeRepository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found"));
 
         validateEmployeeFields(req.name(), req.email(), req.position());
 
@@ -103,7 +107,7 @@ public class EmployeeService {
 
         if (req.departmentId() != null) {
             Department dept = departmentRepository.findById(req.departmentId())
-                .orElseThrow(() -> new BusinessException("Department not found"));
+                    .orElseThrow(() -> new BusinessException("Department not found"));
             existing.setDepartment(dept);
         } else {
             existing.setDepartment(null);
@@ -114,7 +118,7 @@ public class EmployeeService {
                 throw new BusinessException("Employee cannot be their own manager");
             }
             Employee manager = employeeRepository.findById(req.managerId())
-                .orElseThrow(() -> new BusinessException("Manager not found"));
+                    .orElseThrow(() -> new BusinessException("Manager not found"));
             // optional: enforce same department for manager and employee
             if (existing.getDepartment() != null && manager.getDepartment() != null
                     && !existing.getDepartment().getId().equals(manager.getDepartment().getId())) {
@@ -128,15 +132,17 @@ public class EmployeeService {
         return employeeRepository.save(existing);
     }
 
+    @SuppressWarnings("null")
     public Employee findById(UUID id) {
         return employeeRepository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found"));
     }
 
     @Transactional
+    @SuppressWarnings("null")
     public void deleteEmployee(UUID id) {
         Employee existing = employeeRepository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found"));
 
         if (employeeRepository.existsByManager_Id(id)) {
             throw new BusinessException("Cannot delete employee who manages other employees");

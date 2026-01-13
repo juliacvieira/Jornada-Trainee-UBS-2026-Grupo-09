@@ -17,11 +17,11 @@ public abstract class AbstractIntegrationTest {
      * avoiding manual resource management and IDE "resource leak" warnings.
      */
     @Container
-    static final PostgreSQLContainer<?> postgres =
-            new PostgreSQLContainer<>("postgres:15-alpine")
-                    .withDatabaseName("expense_manager_test")
-                    .withUsername("test")
-                    .withPassword("test");
+    @SuppressWarnings("resource")
+    static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine")
+            .withDatabaseName("expense_manager_test")
+            .withUsername("test")
+            .withPassword("test");
 
     /**
      * Inject dynamic datasource properties into the Spring context

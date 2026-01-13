@@ -11,7 +11,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class ControllerExceptionHandler {
 
     @ExceptionHandler(NoSuchElementException.class)
+    @SuppressWarnings("null")
     public ErrorResponse notFound(NoSuchElementException ex) {
-        return ErrorResponse.create(ex, HttpStatus.NOT_FOUND, ex.getMessage());
+        return ErrorResponse.create(ex, HttpStatus.NOT_FOUND, ex.getMessage() != null ? ex.getMessage() : "Not found");
     }
 }

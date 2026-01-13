@@ -20,14 +20,11 @@ import com.ubs.expensemanager.exception.BusinessException;
 import com.ubs.expensemanager.repository.CategoryRepository;
 import com.ubs.expensemanager.repository.EmployeeRepository;
 import com.ubs.expensemanager.repository.ExpenseRepository;
-import com.ubs.expensemanager.service.AlertService;
-import com.ubs.expensemanager.service.ReceiptStorageService;
-
 
 @Service
 public class ExpenseService {
 
-	private final ExpenseRepository expenseRepository;
+    private final ExpenseRepository expenseRepository;
     private final EmployeeRepository employeeRepository;
     private final CategoryRepository categoryRepository;
     private final AlertService alertService;
@@ -46,6 +43,7 @@ public class ExpenseService {
     }
 
     @Transactional
+    @SuppressWarnings("null")
     public Expense createExpense(CreateExpenseRequest request) {
         Employee employee = employeeRepository.findById(request.employeeId())
                 .orElseThrow(() -> new BusinessException("Employee not found"));
@@ -69,11 +67,12 @@ public class ExpenseService {
     }
 
     @Transactional
+    @SuppressWarnings("null")
     public Expense updateExpense(UUID id, UpdateExpenseRequest request) {
         Expense existing = findById(id);
 
         Category newCategory = categoryRepository.findById(request.categoryId())
-            .orElseThrow(() -> new BusinessException("Category not found"));
+                .orElseThrow(() -> new BusinessException("Category not found"));
 
         Expense candidate = new Expense();
         candidate.setId(existing.getId());
@@ -94,16 +93,17 @@ public class ExpenseService {
         existing.setDescription(request.description());
 
         return expenseRepository.save(existing);
-    }       
-    
-	public List<Expense> findAll() {
-	    return expenseRepository.findAll();
-	}
-	
-	public Expense findById(UUID id) {
-	    return expenseRepository.findById(id)
-	        .orElseThrow(() -> new BusinessException("Expense " + id + " not found"));
-	}
+    }
+
+    public List<Expense> findAll() {
+        return expenseRepository.findAll();
+    }
+
+    @SuppressWarnings("null")
+    public Expense findById(UUID id) {
+        return expenseRepository.findById(id)
+                .orElseThrow(() -> new BusinessException("Expense " + id + " not found"));
+    }
 
     private void validateExpenseForCreate(Expense expense) {
         BigDecimal amount = expense.getAmount();
@@ -121,8 +121,7 @@ public class ExpenseService {
             alertService.createAlert(
                     expense,
                     com.ubs.expensemanager.domain.enums.AlertType.CATEGORY_LIMIT,
-                    "Daily category limit exceeded"
-            );
+                    "Daily category limit exceeded");
         }
 
         if (category.getMonthlyLimit() != null && amount.compareTo(category.getMonthlyLimit()) > 0) {
@@ -130,8 +129,7 @@ public class ExpenseService {
             alertService.createAlert(
                     expense,
                     com.ubs.expensemanager.domain.enums.AlertType.CATEGORY_LIMIT,
-                    "Monthly category limit exceeded"
-            );
+                    "Monthly category limit exceeded");
         }
 
         Employee employee = expense.getEmployee();
@@ -146,18 +144,17 @@ public class ExpenseService {
         LocalDate end = ym.atEndOfMonth();
 
         BigDecimal alreadySpent = expenseRepository.sumAmountByDepartmentAndMonth(
-                department.getId(), start, end, ExpenseStatus.APPROVED_FINANCE
-        );
+                department.getId(), start, end, ExpenseStatus.APPROVED_FINANCE);
 
-        if (alreadySpent == null) alreadySpent = BigDecimal.ZERO;
+        if (alreadySpent == null)
+            alreadySpent = BigDecimal.ZERO;
 
         if (alreadySpent.add(amount).compareTo(department.getMonthlyBudget()) > 0) {
             expense.setNeedsReview(true);
             alertService.createAlert(
                     expense,
                     com.ubs.expensemanager.domain.enums.AlertType.DEPARTMENT_BUDGET,
-                    "Department monthly budget exceeded"
-            );
+                    "Department monthly budget exceeded");
         }
     }
 
@@ -168,7 +165,8 @@ public class ExpenseService {
         }
 
         Category category = candidate.getCategory();
-        if (category == null) throw new BusinessException("Category not set");
+        if (category == null)
+            throw new BusinessException("Category not set");
 
         if (category.getDailyLimit() != null && amount.compareTo(category.getDailyLimit()) > 0) {
             throw new BusinessException("Daily category limit exceeded");
@@ -188,9 +186,10 @@ public class ExpenseService {
 
         // sum of month *excluding* the expense that will be update
         BigDecimal alreadySpentExcluding = expenseRepository.sumAmountByDepartmentAndMonthExcluding(
-            department.getId(), start, end, ExpenseStatus.APPROVED_FINANCE, existing.getId());
+                department.getId(), start, end, ExpenseStatus.APPROVED_FINANCE, existing.getId());
 
-        if (alreadySpentExcluding == null) alreadySpentExcluding = BigDecimal.ZERO;
+        if (alreadySpentExcluding == null)
+            alreadySpentExcluding = BigDecimal.ZERO;
 
         if (alreadySpentExcluding.add(amount).compareTo(department.getMonthlyBudget()) > 0) {
             throw new BusinessException("Department monthly budget exceeded");
@@ -213,6 +212,5 @@ public class ExpenseService {
         Expense expense = findById(expenseId);
         return receiptStorageService.loadAsResource(expense.getReceiptFilename());
     }
-
 
 }

@@ -27,7 +27,7 @@ public class DepartmentService {
     private final ExpenseRepository expenseRepository;
 
     public DepartmentService(DepartmentRepository departmentRepository,
-                             ExpenseRepository expenseRepository) {
+            ExpenseRepository expenseRepository) {
         this.departmentRepository = departmentRepository;
         this.expenseRepository = expenseRepository;
     }
@@ -47,13 +47,15 @@ public class DepartmentService {
     }
 
     @Transactional
+    @SuppressWarnings("null")
     public Department updateDepartment(UUID id, UpdateDepartmentRequest req) {
         Department existing = departmentRepository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Department not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Department not found"));
 
         validateDepartmentFields(req.name(), req.monthlyBudget());
 
-        // If budget is being reduced, ensure current approved spending for the relevant period doesn't exceed new budget
+        // If budget is being reduced, ensure current approved spending for the relevant
+        // period doesn't exceed new budget
         BigDecimal newBudget = req.monthlyBudget();
         BigDecimal oldBudget = existing.getMonthlyBudget();
         if (newBudget == null) {
@@ -71,13 +73,15 @@ public class DepartmentService {
             LocalDate end = ym.atEndOfMonth();
 
             BigDecimal alreadySpent = expenseRepository.sumAmountByDepartmentAndMonth(
-                existing.getId(), start, end, /*status*/ com.ubs.expensemanager.domain.enums.ExpenseStatus.APPROVED_FINANCE);
+                    existing.getId(), start, end,
+                    /* status */ com.ubs.expensemanager.domain.enums.ExpenseStatus.APPROVED_FINANCE);
 
-            if (alreadySpent == null) alreadySpent = BigDecimal.ZERO;
+            if (alreadySpent == null)
+                alreadySpent = BigDecimal.ZERO;
 
             if (alreadySpent.compareTo(newBudget) > 0) {
                 throw new BusinessException("Cannot reduce budget: current approved spending this month (" +
-                    alreadySpent + ") exceeds new monthly budget (" + newBudget + ")");
+                        alreadySpent + ") exceeds new monthly budget (" + newBudget + ")");
             }
         }
 
@@ -86,11 +90,12 @@ public class DepartmentService {
         return departmentRepository.save(existing);
     }
 
+    @SuppressWarnings("null")
     public Department findById(UUID id) {
         return departmentRepository.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Department not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Department not found"));
     }
-    
+
     public BigDecimal calculateMonthlyUsage(UUID departmentId, YearMonth yearMonth) {
         LocalDate start = yearMonth.atDay(1);
         LocalDate end = yearMonth.atEndOfMonth();
@@ -99,13 +104,11 @@ public class DepartmentService {
                 departmentId,
                 start,
                 end,
-                com.ubs.expensemanager.domain.enums.ExpenseStatus.APPROVED_FINANCE
-        );
+                com.ubs.expensemanager.domain.enums.ExpenseStatus.APPROVED_FINANCE);
 
         return used != null ? used : BigDecimal.ZERO;
     }
 
-   
     public Map<UUID, BigDecimal> getMonthlyUsageForAll(YearMonth yearMonth) {
         LocalDate start = yearMonth.atDay(1);
         LocalDate end = yearMonth.atEndOfMonth();
@@ -113,14 +116,12 @@ public class DepartmentService {
         List<Object[]> results = expenseRepository.sumAmountByDepartmentBetween(
                 start,
                 end,
-                com.ubs.expensemanager.domain.enums.ExpenseStatus.APPROVED_FINANCE
-        );
+                com.ubs.expensemanager.domain.enums.ExpenseStatus.APPROVED_FINANCE);
 
         return results.stream()
                 .collect(Collectors.toMap(
                         r -> (UUID) r[0],
-                        r -> (BigDecimal) r[1]
-                ));
+                        r -> (BigDecimal) r[1]));
     }
 
     private void validateDepartmentFields(String name, BigDecimal monthlyBudget) {

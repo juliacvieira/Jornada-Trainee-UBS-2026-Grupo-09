@@ -34,8 +34,8 @@ public class ReceiptStorageService {
             throw new BusinessException("File is required");
         }
 
-        String original = file.getOriginalFilename() == null ? "receipt" : file.getOriginalFilename();
-        String safeOriginal = original.replaceAll("[^a-zA-Z0-9._-]", "_");
+        String original = file.getOriginalFilename();
+        String safeOriginal = (original != null ? original : "receipt").replaceAll("[^a-zA-Z0-9._-]", "_");
         String ext = getExtension(safeOriginal);
 
         validateType(file.getContentType(), ext);
@@ -52,6 +52,7 @@ public class ReceiptStorageService {
         return storedName;
     }
 
+    @SuppressWarnings("null")
     public Resource loadAsResource(String storedName) {
         if (storedName == null || storedName.isBlank()) {
             throw new BusinessException("Receipt not found");
@@ -72,13 +73,11 @@ public class ReceiptStorageService {
     private void validateType(String contentType, String ext) {
         String ct = contentType == null ? "" : contentType.toLowerCase(Locale.ROOT);
 
-        boolean okByCt =
-                ct.equals("application/pdf")
-                        || ct.equals("image/png")
-                        || ct.equals("image/jpeg");
+        boolean okByCt = ct.equals("application/pdf")
+                || ct.equals("image/png")
+                || ct.equals("image/jpeg");
 
-        boolean okByExt =
-                ext.equals(".pdf") || ext.equals(".png") || ext.equals(".jpg") || ext.equals(".jpeg");
+        boolean okByExt = ext.equals(".pdf") || ext.equals(".png") || ext.equals(".jpg") || ext.equals(".jpeg");
 
         if (!okByCt && !okByExt) {
             throw new BusinessException("Only PDF, PNG or JPG receipts are allowed");
@@ -87,7 +86,8 @@ public class ReceiptStorageService {
 
     private String getExtension(String filename) {
         int idx = filename.lastIndexOf('.');
-        if (idx < 0) return "";
+        if (idx < 0)
+            return "";
         return filename.substring(idx).toLowerCase(Locale.ROOT);
     }
 }

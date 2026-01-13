@@ -17,31 +17,31 @@ import com.ubs.expensemanager.repository.CategoryRepository;
 public class CategoryService {
     private final CategoryRepository repository;
 
-    public CategoryService(CategoryRepository repository){
+    public CategoryService(CategoryRepository repository) {
         this.repository = repository;
     }
 
     @Transactional
-    public Category createCategory (CreateCategoryRequest request){
+    public Category createCategory(CreateCategoryRequest request) {
         Category category = new Category();
 
         category.setName(request.name());
         category.setDailyLimit(request.dailyLimit());
         category.setMonthlyLimit(request.monthlyLimit());
-        
+
         validateCategory(category);
         return repository.save(category);
     }
 
-    public List<Category> findAll(){
+    public List<Category> findAll() {
         return repository.findAll();
     }
 
     @Transactional
-    public Category updateCategory (UUID id, UpdateCategoryRequest request){
+    public Category updateCategory(UUID id, UpdateCategoryRequest request) {
         Category category = findById(id);
 
-        //acrescentar validação
+        // acrescentar validação
         category.setName(request.name());
         category.setDailyLimit(request.dailyLimit());
         category.setMonthlyLimit(request.monthlyLimit());
@@ -50,17 +50,18 @@ public class CategoryService {
 
     }
 
-    public Category findById(UUID id){
+    @SuppressWarnings("null")
+    public Category findById(UUID id) {
         return repository.findById(id)
-        .orElseThrow(() -> new NoSuchElementException("Category" + id + "not found"));
+                .orElseThrow(() -> new NoSuchElementException("Category " + id + " not found"));
     }
 
-    private boolean validateCategory (Category category){
-    	if (category.getDailyLimit() == null || category.getMonthlyLimit() == null) {
+    private boolean validateCategory(Category category) {
+        if (category.getDailyLimit() == null || category.getMonthlyLimit() == null) {
             throw new IllegalArgumentException("Limits must be provided");
         }
         if (category.getDailyLimit().compareTo(BigDecimal.ZERO) < 0 ||
-            category.getMonthlyLimit().compareTo(BigDecimal.ZERO) < 0) {
+                category.getMonthlyLimit().compareTo(BigDecimal.ZERO) < 0) {
             throw new IllegalArgumentException("Limits must be non-negative");
         }
         if (category.getMonthlyLimit().compareTo(category.getDailyLimit()) < 0) {
