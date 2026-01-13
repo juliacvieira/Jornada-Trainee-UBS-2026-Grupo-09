@@ -297,6 +297,6 @@ Este projeto está sob licença MIT. Veja o arquivo [LICENSE](LICENSE) para deta
 
 ## 👥 Grupo 09 - Jornada Trainee UBS 2026
 
-Desenvolvido com ❤️ pelo Grupo 9
+Desenvolvido pelo Grupo 9
 
 **Última atualização**: 13 de janeiro de 2026
