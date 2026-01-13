@@ -1,3 +1,5 @@
+Readme:# 📋 Expense Manager - Jornada Trainee UBS 2026
+
 # 📋 Expense Manager - Jornada Trainee UBS 2026
 
 Repositório do projeto desenvolvido pelo Grupo 9 durante o processo seletivo da Jornada de Trainee UBS 2026.
