@@ -112,39 +112,52 @@ public class ExpenseService {
         }
 
         Category category = expense.getCategory();
-        if (category == null) throw new BusinessException("Category not set");
+        if (category == null) {
+            throw new BusinessException("Category not set");
+        }
 
-        // check limits per category
         if (category.getDailyLimit() != null && amount.compareTo(category.getDailyLimit()) > 0) {
             expense.setNeedsReview(true);
-            alertService.createAlert(expense, com.ubs.expensemanager.domain.enums.AlertType.CATEGORY_LIMIT,
-                    "Daily category limit exceeded");
+            alertService.createAlert(
+                    expense,
+                    com.ubs.expensemanager.domain.enums.AlertType.CATEGORY_LIMIT,
+                    "Daily category limit exceeded"
+            );
         }
+
         if (category.getMonthlyLimit() != null && amount.compareTo(category.getMonthlyLimit()) > 0) {
             expense.setNeedsReview(true);
-            alertService.createAlert(expense, com.ubs.expensemanager.domain.enums.AlertType.CATEGORY_LIMIT,
-                    "Monthly category limit exceeded");
+            alertService.createAlert(
+                    expense,
+                    com.ubs.expensemanager.domain.enums.AlertType.CATEGORY_LIMIT,
+                    "Monthly category limit exceeded"
+            );
         }
 
-        // department budget considering the already approved expenses
         Employee employee = expense.getEmployee();
         Department department = employee != null ? employee.getDepartment() : null;
-        if (department != null && department.getMonthlyBudget() != null) {
-            YearMonth ym = YearMonth.from(expense.getDate());
-            LocalDate start = ym.atDay(1);
-            LocalDate end = ym.atEndOfMonth();
 
-            BigDecimal alreadySpent = expenseRepository.sumAmountByDepartmentAndMonth(
-                department.getId(), start, end, ExpenseStatus.APPROVED_FINANCE);
+        if (department == null || department.getMonthlyBudget() == null) {
+            throw new BusinessException("Department budget not configured");
+        }
 
-            if (alreadySpent == null) alreadySpent = BigDecimal.ZERO;
+        YearMonth ym = YearMonth.from(expense.getDate());
+        LocalDate start = ym.atDay(1);
+        LocalDate end = ym.atEndOfMonth();
 
-            if (alreadySpent.add(amount).compareTo(department.getMonthlyBudget()) > 0) {
-                expense.setNeedsReview(true);
-                alertService.createAlert(expense, com.ubs.expensemanager.domain.enums.AlertType.DEPARTMENT_BUDGET,
-                        "Department monthly budget exceeded");
-                throw new BusinessException("Department monthly budget exceeded");
-            }
+        BigDecimal alreadySpent = expenseRepository.sumAmountByDepartmentAndMonth(
+                department.getId(), start, end, ExpenseStatus.APPROVED_FINANCE
+        );
+
+        if (alreadySpent == null) alreadySpent = BigDecimal.ZERO;
+
+        if (alreadySpent.add(amount).compareTo(department.getMonthlyBudget()) > 0) {
+            expense.setNeedsReview(true);
+            alertService.createAlert(
+                    expense,
+                    com.ubs.expensemanager.domain.enums.AlertType.DEPARTMENT_BUDGET,
+                    "Department monthly budget exceeded"
+            );
         }
     }
 
