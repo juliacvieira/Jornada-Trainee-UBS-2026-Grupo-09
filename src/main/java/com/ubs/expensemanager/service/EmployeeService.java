@@ -16,6 +16,7 @@ import com.ubs.expensemanager.dto.employee.CreateEmployeeRequest;
 import com.ubs.expensemanager.dto.employee.UpdateEmployeeRequest;
 import com.ubs.expensemanager.exception.BusinessException;
 import com.ubs.expensemanager.repository.DepartmentRepository;
+import com.ubs.expensemanager.repository.ExpenseRepository;
 import com.ubs.expensemanager.repository.EmployeeRepository;
 
 @Service
@@ -23,14 +24,17 @@ public class EmployeeService {
 
     private final EmployeeRepository employeeRepository;
     private final DepartmentRepository departmentRepository;
+    private final ExpenseRepository expenseRepository;
 
     // simple email regex (practical, not RFC-perfect)
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
 
     public EmployeeService(EmployeeRepository employeeRepository,
-                           DepartmentRepository departmentRepository) {
+                           DepartmentRepository departmentRepository,
+                           ExpenseRepository expenseRepository) {
         this.employeeRepository = employeeRepository;
         this.departmentRepository = departmentRepository;
+        this.expenseRepository = expenseRepository;
     }
 
     @Transactional
@@ -127,6 +131,22 @@ public class EmployeeService {
     public Employee findById(UUID id) {
         return employeeRepository.findById(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found"));
+    }
+
+    @Transactional
+    public void deleteEmployee(UUID id) {
+        Employee existing = employeeRepository.findById(id)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found"));
+
+        if (employeeRepository.existsByManager_Id(id)) {
+            throw new BusinessException("Cannot delete employee who manages other employees");
+        }
+
+        if (expenseRepository.existsByEmployee_Id(id)) {
+            throw new BusinessException("Cannot delete employee with registered expenses");
+        }
+
+        employeeRepository.delete(existing);
     }
 
     private void validateEmployeeFields(String name, String email, String position) {

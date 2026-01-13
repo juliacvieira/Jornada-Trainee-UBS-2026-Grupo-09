@@ -57,4 +57,6 @@ public interface ExpenseRepository extends JpaRepository<Expense, UUID> {
         @Param("end") LocalDate end,
         @Param("status") com.ubs.expensemanager.domain.enums.ExpenseStatus status
     );
+
+    boolean existsByEmployee_Id(UUID employeeId);
 }

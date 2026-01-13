@@ -10,4 +10,5 @@ import java.util.Optional;
 @Repository
 public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
     Optional<Employee> findByEmail(String email);
+    boolean existsByManager_Id(UUID managerId);
 }
