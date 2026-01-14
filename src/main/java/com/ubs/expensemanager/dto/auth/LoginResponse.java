@@ -8,15 +8,17 @@ public class LoginResponse {
     private String name;
     private String role;
     private boolean active;
+    private String token;
 
     public LoginResponse() {}
 
-    public LoginResponse(UUID id, String email, String name, String role, boolean active) {
+    public LoginResponse(UUID id, String email, String name, String role, boolean active, String token) {
         this.id = id;
         this.email = email;
         this.name = name;
         this.role = role;
         this.active = active;
+        this.token = token;
     }
 
     public UUID getId() { return id; }
@@ -33,4 +35,7 @@ public class LoginResponse {
 
     public boolean isActive() { return active; }
     public void setActive(boolean active) { this.active = active; }
+
+    public String getToken() { return token; }
+    public void setToken(String token) { this.token = token; }
 }

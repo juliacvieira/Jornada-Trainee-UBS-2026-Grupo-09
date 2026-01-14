@@ -10,30 +10,36 @@ import { EmployeesPage } from './pages/EmployeesPage';
 import { ApprovalPage } from './pages/ApprovalPage';
 import { AlertsPage } from './pages/AlertsPage';
 import { translations, type Language } from './translations';
+import { Toaster } from './components/ui/sonner';
 import { ProtectedRoute } from './routes/ProtectedRoute';
 
 export default function App() {
   const [language, setLanguage] = useState<Language>("pt");
-
   const t = translations[language];
 
   return (
-    <Routes>
-      {/* Pública */}
-      <Route
-        path="/login"
-        element={
-          <LoginPage t={t} language={language} onLanguageChange={setLanguage} />
-        }
-      />
+    <>
+      <Toaster />
+      <Routes>
 
-      {/* Privadas */}
-      <Route
-        path="/"
-        element={
-          <ProtectedRoute>
-            <AppLayout>
-              <>
+        {/* Pública */}
+        <Route
+          path="/login"
+          element={
+            <LoginPage
+              t={t}
+              language={language}
+              onLanguageChange={setLanguage}
+            />
+          }
+        />
+
+        {/* Privadas */}
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <AppLayout>
                 <Navbar
                   language={language}
                   onLanguageChange={setLanguage}
@@ -47,51 +53,54 @@ export default function App() {
                     reports: t.reports.title,
                   }}
                 />
-              </>
-            </AppLayout>
-          </ProtectedRoute>
-        }
-      >
-        <Route index element={<Navigate to="expenses" replace />} />
-
-        <Route path="expenses" element={<ExpensesPage t={t} language={language} />} />
-
-        <Route
-          path="employees"
-          element={
-            <ProtectedRoute allowedRoles={["MANAGER"]}>
-              <EmployeesPage t={t} />
+              </AppLayout>
             </ProtectedRoute>
           }
-        />
+        >
+          <Route index element={<Navigate to="expenses" replace />} />
 
-        <Route
-          path="approval"
-          element={
-            <ProtectedRoute allowedRoles={["MANAGER", "FINANCE"]}>
-              <ApprovalPage t={t} language={language} />
-            </ProtectedRoute>
-          }
-        />
+          <Route
+            path="expenses"
+            element={<ExpensesPage t={t} language={language} />}
+          />
 
-        <Route
-          path="alerts"
-          element={
-            <ProtectedRoute allowedRoles={["FINANCE"]}>
-              <AlertsPage t={t} language={language} />
-            </ProtectedRoute>
-          }
-        />
+          <Route
+            path="employees"
+            element={
+              <ProtectedRoute allowedRoles={["MANAGER"]}>
+                <EmployeesPage t={t} />
+              </ProtectedRoute>
+            }
+          />
 
-        <Route
-          path="reports"
-          element={
-            <ProtectedRoute allowedRoles={["FINANCE"]}>
-              <ReportsPage t={t} language={language} />
-            </ProtectedRoute>
-          }
-        />
-      </Route>
-    </Routes>
+          <Route
+            path="approval"
+            element={
+              <ProtectedRoute allowedRoles={["MANAGER", "FINANCE"]}>
+                <ApprovalPage t={t} language={language} />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="alerts"
+            element={
+              <ProtectedRoute allowedRoles={["MANAGER", "FINANCE"]}>
+                <AlertsPage t={t} language={language} />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="reports"
+            element={
+              <ProtectedRoute allowedRoles={["FINANCE"]}>
+                <ReportsPage t={t} language={language} />
+              </ProtectedRoute>
+            }
+          />
+        </Route>
+      </Routes>
+    </>
   );
 }

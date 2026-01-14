@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from '../hooks/useAuth';
+import { toast } from 'sonner';
 import type { UserRole } from "../auth/types";
 import { ChevronDown, Eye, EyeOff } from 'lucide-react';
 import { Button } from "../components/ui/button";
@@ -32,22 +33,25 @@ export function LoginPage({ t, language, onLanguageChange }: LoginPageProps) {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    login(email || "user@ubs.com", role);
-    navigate("/expenses");
+  // function handleSubmit(e: React.FormEvent) {
+  //   e.preventDefault();
+  //   login(email || "user@ubs.com", role);
+  //   navigate("/expenses");
+  // }
+
+  async function handleSubmit(e: React.FormEvent) {
+  e.preventDefault();
+
+  try {
+    await login(email, password);
+    toast.success('Login efetuado com sucesso');
+    navigate('/expenses');
+  } catch (err: any) {
+    console.error('Login failed:', err);
+    const msg = err?.message || 'Erro ao efetuar login';
+    toast.error(msg);
   }
-
-//   async function handleSubmit(e: React.FormEvent) {
-//   e.preventDefault();
-
-//   try {
-//     await login(email, password);
-//     navigate('/expenses');
-//   } catch (err) {
-//     console.error('Login failed:', err);
-//   }
-// };
+};
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 p-8">
@@ -113,7 +117,7 @@ export function LoginPage({ t, language, onLanguageChange }: LoginPageProps) {
             </div>
 
             {/* Role (mock) */}
-            <div className="space-y-2">
+            {/* <div className="space-y-2">
               <Label htmlFor="role">{t.login.role}</Label>
               <select
                 id="role"
@@ -125,7 +129,7 @@ export function LoginPage({ t, language, onLanguageChange }: LoginPageProps) {
                 <option value="MANAGER">{t.employees.roles.manager}</option>
                 <option value="FINANCE">{t.employees.roles.finance}</option>
               </select>
-            </div>
+            </div> */}
 
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">

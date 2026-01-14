@@ -1,16 +1,20 @@
 import { apiFetch } from "./apiClient";
 
 export interface LoginResponse {
-  email: string;
-  role: "EMPLOYEE" | "MANAGER" | "FINANCE";
+    id: string;
+    email: string;
+    name: string;
+    role: "EMPLOYEE" | "MANAGER" | "FINANCE";
+    active: boolean;
+    token?: string;
 }
 
 export function loginRequest(
-  email: string,
-  password: string
+    email: string,
+    password: string
 ): Promise<LoginResponse> {
-  return apiFetch<LoginResponse>("/auth/login", {
-    method: "POST",
-    body: JSON.stringify({ email, password }),
-  });
+    return apiFetch<LoginResponse>("/api/auth/login", {
+        method: "POST",
+        body: JSON.stringify({ email, password }),
+    });
 }

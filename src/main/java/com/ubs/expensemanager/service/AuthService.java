@@ -3,6 +3,9 @@ package com.ubs.expensemanager.service;
 import com.ubs.expensemanager.domain.User;
 import com.ubs.expensemanager.dto.auth.LoginRequest;
 import com.ubs.expensemanager.dto.auth.LoginResponse;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import com.ubs.expensemanager.exception.BusinessException;
 import com.ubs.expensemanager.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -10,27 +13,38 @@ import org.springframework.stereotype.Service;
 @Service
 public class AuthService {
 
-    private final UserRepository userRepository;
+  private final AuthenticationManager authenticationManager;
+  private final JwtService jwtService;
 
-    public AuthService(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
+  public AuthService(AuthenticationManager authenticationManager, JwtService jwtService) {
+    this.authenticationManager = authenticationManager;
+    this.jwtService = jwtService;
+  }
 
-    public LoginResponse login(LoginRequest request) {
-        User user = userRepository.findByEmailAndActive(request.getEmail(), true)
-                .orElseThrow(() -> new BusinessException("Invalid email or password"));
+  public LoginResponse login(LoginRequest request) {
+    Authentication authentication = authenticationManager.authenticate(
+        new UsernamePasswordAuthenticationToken(
+            request.getEmail(),
+            request.getPassword()
+        )
+    );
 
-        // Simple password validation (should use BCrypt in production)
-        if (!user.getPassword().equals(request.getPassword())) {
-            throw new BusinessException("Invalid email or password");
-        }
+    String authority = authentication.getAuthorities()
+        .iterator()
+        .next()
+        .getAuthority();
 
-        return new LoginResponse(
-                user.getId(),
-                user.getEmail(),
-                user.getName(),
-                user.getRole(),
-                user.isActive()
-        );
-    }
+    String role = authority.replace("ROLE_", "").toLowerCase();
+
+    String token = jwtService.generateToken(
+        request.getEmail(),
+        role
+    );
+
+    return new LoginResponse(
+        request.getEmail(),
+        role,
+        token
+    );
+  }
 }
