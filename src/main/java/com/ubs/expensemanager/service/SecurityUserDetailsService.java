@@ -1,3 +1,12 @@
+package com.ubs.expensemanager.service;
+import org.springframework.stereotype.Service;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import com.ubs.expensemanager.domain.User;
+import com.ubs.expensemanager.repository.UserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
 @Service
 public class SecurityUserDetailsService implements UserDetailsService {
 

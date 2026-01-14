@@ -6,7 +6,7 @@ export interface LoginResponse {
     name: string;
     role: "EMPLOYEE" | "MANAGER" | "FINANCE";
     active: boolean;
-    token?: string;
+    token: string;
 }
 
 export function loginRequest(
