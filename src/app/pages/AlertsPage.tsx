@@ -42,7 +42,7 @@ const mockActiveAlerts: Alert[] = [
   {
     id: '1',
     type: 'limit_exceeded',
-    message: 'Category limit "Meal" exceeded in USD 150',
+    message: 'Category limit "Meal" exceeded in R$ 150',
     employeeName: 'João Santos',
     amount: 1200,
     triggeredAt: '2025-12-24T10:30:00',
@@ -238,7 +238,7 @@ export function AlertsPage({ t, language }: AlertsPageProps) {
                     {alert.message}
                   </td>
                   <td className="py-3 px-4 text-right text-gray-900">
-                    {alert.amount ? `USD ${alert.amount.toFixed(2)}` : '-'}
+                    {alert.amount ? `R$ ${alert.amount.toFixed(2)}` : '-'}
                   </td>
                   <td className="py-3 px-4 text-gray-700 text-sm">
                     {formatDate(alert.triggeredAt, language)}
@@ -401,7 +401,7 @@ export function AlertsPage({ t, language }: AlertsPageProps) {
                   <p><strong>{t.approval.employee}:</strong> {selectedDetailsAlert.employeeName}</p>
                   <p><strong>{t.alerts.message}:</strong> {selectedDetailsAlert.message}</p>
                   {selectedDetailsAlert.amount && (
-                    <p><strong>{t.expenses.amount}:</strong> USD {selectedDetailsAlert.amount.toFixed(2)}</p>
+                    <p><strong>{t.expenses.amount}:</strong> R$ {selectedDetailsAlert.amount.toFixed(2)}</p>
                   )}
                   <p><strong>{t.alerts.triggered}:</strong> {formatDate(selectedDetailsAlert.triggeredAt, language)}</p>
                   <p><strong>{t.alerts.resolveNote}:</strong> {selectedDetailsAlert.resolveNote || '-'}</p>
@@ -441,7 +441,7 @@ export function AlertsPage({ t, language }: AlertsPageProps) {
                   <p><strong>{t.approval.employee}:</strong> {selectedAlert.employeeName}</p>
                   <p><strong>{t.alerts.message}:</strong> {selectedAlert.message}</p>
                   {selectedAlert.amount && (
-                    <p><strong>{t.expenses.amount}:</strong> USD {selectedAlert.amount.toFixed(2)}</p>
+                    <p><strong>{t.expenses.amount}:</strong> R$ {selectedAlert.amount.toFixed(2)}</p>
                   )}
                 </div>
               )}

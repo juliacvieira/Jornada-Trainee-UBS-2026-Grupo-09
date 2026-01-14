@@ -174,7 +174,7 @@ export const translations = {
       // Chart labels and CSV headers
       approvedExpensesPercent: 'Despesas aprovadas (%)',
       remainingBudgetPercent: 'Orçamento restante (%)',
-      expensesUSD: 'Despesas (USD)',
+      expensesUSD: 'Despesas (BRL)',
       csv: {
         month: 'Mês',
         monthIndex: 'Mês (#)',
@@ -395,7 +395,7 @@ export const translations = {
       graphTopExpenses: 'Expenses per employee during the period',      // Chart labels and CSV headers
       approvedExpensesPercent: 'Approved expenses (%)',
       remainingBudgetPercent: 'Remaining budget (%)',
-      expensesUSD: 'Expenses (USD)',
+      expensesUSD: 'Expenses (BRL)',
       csv: {
         month: 'Month',
         monthIndex: 'Month (#)',

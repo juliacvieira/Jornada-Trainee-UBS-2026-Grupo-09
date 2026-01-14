@@ -76,7 +76,7 @@ const mockExpenses: Expense[] = [
     status: 'rejected',
     rejectedBy: 'Carlos Oliveira',
     rejectedByRole: 'manager',
-    rejectionReason: 'Value exceed the limit. Internal policy allows maximum of USD 80 per person.',
+    rejectionReason: 'Value exceed the limit. Internal policy allows maximum of R$ 80 por pessoa.',
   },
   {
     id: '5',
@@ -453,10 +453,10 @@ export function ExpensesPage({ t, language }: ExpensesPageProps) {
                       <Progress value={percentage} className="h-2" />
                       <div className="flex items-center justify-between text-xs text-gray-600">
                         <span>
-                          {t.expenses.spent}: USD {limit.spent.toFixed(2)}
+                          {t.expenses.spent}: R$ {limit.spent.toFixed(2)}
                         </span>
                         <span>
-                          {t.expenses.limit}: USD {limit.limit.toFixed(2)}
+                          {t.expenses.limit}: R$ {limit.limit.toFixed(2)}
                         </span>
                       </div>
                     </div>
@@ -533,7 +533,7 @@ export function ExpensesPage({ t, language }: ExpensesPageProps) {
                             {expense.description}
                           </td>
                           <td className="py-3 px-4 text-right text-gray-900">
-                            USD {expense.amount.toFixed(2)}
+                            R$ {expense.amount.toFixed(2)}
                           </td>
                           <td className="py-3 px-4">
                             <div className="flex items-center justify-center gap-2">
@@ -615,7 +615,7 @@ export function ExpensesPage({ t, language }: ExpensesPageProps) {
               <div>
                 <Label className="text-gray-600 text-sm">{t.expenses.amount}</Label>
                 <p className="text-gray-900 text-xl mt-1">
-                  USD {selectedExpenseForDetails.amount.toFixed(2)}
+                  R$ {selectedExpenseForDetails.amount.toFixed(2)}
                 </p>
               </div>
 
@@ -735,7 +735,7 @@ export function ExpensesPage({ t, language }: ExpensesPageProps) {
           {selectedExpenseToCancel && (
             <div className="mt-4 space-y-2 text-sm">
               <p><strong>{t.expenses.date}:</strong> {formatDate(selectedExpenseToCancel.date, language)}</p>
-              <p><strong>{t.expenses.amount}:</strong> USD {selectedExpenseToCancel.amount.toFixed(2)}</p>
+              <p><strong>{t.expenses.amount}:</strong> R$ {selectedExpenseToCancel.amount.toFixed(2)}</p>
               <p><strong>{t.expenses.description}:</strong> {selectedExpenseToCancel.description}</p>
             </div>
           )}

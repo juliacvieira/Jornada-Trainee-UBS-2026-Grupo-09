@@ -259,7 +259,7 @@ export function ApprovalPage({ t, language }: ApprovalPageProps) {
                     {expense.description}
                   </td>
                   <td className="py-3 px-4 text-right text-gray-900">
-                    USD {expense.amount.toFixed(2)}
+                    R$ {expense.amount.toFixed(2)}
                   </td>
                   {!showActions && (
                     <td className="py-3 px-4">
@@ -463,7 +463,7 @@ export function ApprovalPage({ t, language }: ApprovalPageProps) {
               {selectedExpense && (
                 <div className="mt-4 space-y-2 text-sm">
                   <p><strong>{t.approval.employee}:</strong> {selectedExpense.employeeName}</p>
-                  <p><strong>{t.expenses.amount}:</strong> USD {selectedExpense.amount.toFixed(2)}</p>
+                  <p><strong>{t.expenses.amount}:</strong> R$ {selectedExpense.amount.toFixed(2)}</p>
                   <p><strong>{t.expenses.description}:</strong> {selectedExpense.description}</p>
                 </div>
               )}

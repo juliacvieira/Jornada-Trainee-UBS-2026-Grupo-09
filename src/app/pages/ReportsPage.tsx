@@ -133,7 +133,7 @@ export function ReportsPage({ t, language }: ReportsPageProps) {
   const statsCards = [
     {
       title: t.reports.totalExpenses,
-      value: 'USD 117,200',
+      value: 'R$ 117.200',
       change: '+12.5%',
       icon: DollarSign,
       color: 'text-[#E60000]',
@@ -149,7 +149,7 @@ export function ReportsPage({ t, language }: ReportsPageProps) {
     },
     {
       title: t.reports.averageExpense,
-      value: 'USD 1,245',
+      value: 'R$ 1.245',
       change: '+5.3%',
       icon: TrendingUp,
       color: 'text-green-600',
@@ -174,13 +174,13 @@ export function ReportsPage({ t, language }: ReportsPageProps) {
         <div className="bg-white p-4 border border-gray-200 rounded shadow-lg">
           <p className="font-semibold mb-2">{data.month}</p>
           <p className="text-sm text-gray-700">
-            <span className="text-[#E60000]">● {t.reports.approvedExpensesPercent.replace(' (%)', '')}:</span> USD {data.spent.toLocaleString(locale)}
+            <span className="text-[#E60000]">● {t.reports.approvedExpensesPercent.replace(' (%)', '')}:</span> R$ {data.spent.toLocaleString(locale)}
           </p>
           <p className="text-sm text-gray-700">
-            <span className="text-[#10B981]">● {t.reports.remainingBudgetPercent.replace(' (%)', '')}:</span> USD {data.remaining.toLocaleString(locale)}
+            <span className="text-[#10B981]">● {t.reports.remainingBudgetPercent.replace(' (%)', '')}:</span> R$ {data.remaining.toLocaleString(locale)}
           </p>
           <p className="text-sm text-gray-500 mt-1">
-            Total: USD {budgetLimit.toLocaleString(locale)}
+            Total: R$ {budgetLimit.toLocaleString(locale)}
           </p>
         </div>
       );
@@ -463,7 +463,7 @@ export function ReportsPage({ t, language }: ReportsPageProps) {
                         <p className="text-sm text-gray-500">{spender.department}</p>
                       </div>
                     </div>
-                    <p className="text-gray-900 font-semibold">USD {spender.amount.toLocaleString(locale)}</p>
+                    <p className="text-gray-900 font-semibold">R$ {spender.amount.toLocaleString(locale)}</p>
                   </div>
                 ))}
               </div>
