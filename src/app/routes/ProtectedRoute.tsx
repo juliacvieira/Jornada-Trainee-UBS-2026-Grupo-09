@@ -1,20 +1,30 @@
+import React from "react";
 import { Navigate } from "react-router-dom";
-import { useAuth} from "../hooks/useAuth";
-import type { UserRole } from "../auth/types";
+import { useContext } from "react";
+import { AuthContext } from "../auth/AuthContext";
 
-interface ProtectedRouteProps {
+interface Props {
   children: React.ReactNode;
-  allowedRoles?: UserRole[];
+  allowedRoles?: Array<"EMPLOYEE" | "MANAGER" | "FINANCE">;
 }
 
-export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
-  const { user } = useAuth();
+/**
+ * Uso:
+ * <ProtectedRoute allowedRoles={["MANAGER", "FINANCE"]}>
+ *   <ManagerPage />
+ * </ProtectedRoute>
+ */
+export default function ProtectedRoute({ children, allowedRoles }: Props) {
+  const auth = useContext(AuthContext);
+  if (!auth) throw new Error("AuthContext not found");
+  const { user } = auth;
 
   if (!user) {
     return <Navigate to="/login" replace />;
   }
 
   if (allowedRoles && !allowedRoles.includes(user.role)) {
+    // redireciona para página padrão de despesas se não tiver autorização
     return <Navigate to="/expenses" replace />;
   }
 

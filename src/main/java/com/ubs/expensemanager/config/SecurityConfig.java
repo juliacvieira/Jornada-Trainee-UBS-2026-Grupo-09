@@ -59,7 +59,7 @@ public class SecurityConfig {
      */
     @Bean
     public PasswordEncoder passwordEncoder() {
-    	return NoOpPasswordEncoder.getInstance();
+    	return new BCryptPasswordEncoder();
     }
 
     /**
@@ -76,7 +76,7 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**").permitAll() // keep this path as you requested
+                .requestMatchers("/api/auth/login").permitAll() // keep this path as you requested
                 .anyRequest().authenticated()
             )
             .sessionManagement(session ->
