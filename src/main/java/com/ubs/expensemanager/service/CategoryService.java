@@ -41,10 +41,15 @@ public class CategoryService {
     public Category updateCategory (UUID id, UpdateCategoryRequest request){
         Category category = findById(id);
 
-        //acrescentar validação
-        category.setName(request.name());
-        category.setDailyLimit(request.dailyLimit());
-        category.setMonthlyLimit(request.monthlyLimit());
+        if (request.name() != null){
+            category.setName(request.name());
+        }
+        if (request.dailyLimit() != null){
+            category.setDailyLimit(request.dailyLimit());
+        }
+        if (request.monthlyLimit() != null){
+            category.setMonthlyLimit(request.monthlyLimit());
+        }
         validateCategory(category);
         return repository.save(category);
 
@@ -69,4 +74,7 @@ public class CategoryService {
 
         return true;
     }
+
+   
+    
 }
