@@ -12,6 +12,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.ubs.expensemanager.domain.Department;
 import com.ubs.expensemanager.domain.Employee;
+import com.ubs.expensemanager.domain.enums.EmployeeRole;
 import com.ubs.expensemanager.dto.employee.CreateEmployeeRequest;
 import com.ubs.expensemanager.dto.employee.UpdateEmployeeRequest;
 import com.ubs.expensemanager.exception.BusinessException;
@@ -40,6 +41,7 @@ public class EmployeeService {
     @Transactional
     public Employee createEmployee(CreateEmployeeRequest req) {
         validateEmployeeFields(req.name(), req.email(), req.position());
+        validateRole(req.role());
 
         if (!EMAIL_PATTERN.matcher(req.email()).matches()) {
             throw new BusinessException("Invalid email format");
@@ -55,6 +57,7 @@ public class EmployeeService {
         e.setName(req.name());
         e.setEmail(req.email());
         e.setPosition(req.position());
+        e.setRole(req.role());
 
         if (req.departmentId() != null) {
             Department dept = departmentRepository.findById(req.departmentId())
@@ -83,7 +86,9 @@ public class EmployeeService {
         Employee existing = employeeRepository.findById(id)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Employee not found"));
 
+
         validateEmployeeFields(req.name(), req.email(), req.position());
+        validateRole(req.role());
 
         if (!EMAIL_PATTERN.matcher(req.email()).matches()) {
             throw new BusinessException("Invalid email format");
@@ -100,6 +105,7 @@ public class EmployeeService {
         existing.setName(req.name());
         existing.setEmail(req.email());
         existing.setPosition(req.position());
+        existing.setRole(req.role());
 
         if (req.departmentId() != null) {
             Department dept = departmentRepository.findById(req.departmentId())
@@ -159,5 +165,13 @@ public class EmployeeService {
         if (position == null || position.isBlank()) {
             throw new BusinessException("Employee position must be provided");
         }
+    }
+
+    private void validateRole (EmployeeRole role){
+        if (role != EmployeeRole.MANAGER){
+            throw new BusinessException("Only managers can do this action");
+        }
+        
+
     }
 }

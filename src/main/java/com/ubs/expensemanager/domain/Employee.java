@@ -3,6 +3,8 @@ package com.ubs.expensemanager.domain;
 import jakarta.persistence.*;
 import java.util.UUID;
 
+import com.ubs.expensemanager.domain.enums.EmployeeRole;
+
 @Entity
 @Table(name = "employees")
 public class Employee {
@@ -27,7 +29,11 @@ public class Employee {
     @JoinColumn(name = "department_id")
     private Department department;
 
+    private EmployeeRole role;
+
     public Employee() {}
+
+   
 
     // getters / setters
     public UUID getId() { return id; }
@@ -42,4 +48,6 @@ public class Employee {
     public void setManager(Employee manager) { this.manager = manager; }
     public Department getDepartment() { return department; }
     public void setDepartment(Department department) { this.department = department; }
+    public EmployeeRole getRole() {return role;}
+    public void setRole(EmployeeRole role) {this.role = role;}
 }
