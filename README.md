@@ -1,14 +1,12 @@
-Readme:# 📋 Expense Manager - Jornada Trainee UBS 2026
+Readme:# 📋 Expense Manager - UBS Trainee Journey 2026
 
-# 📋 Expense Manager - Jornada Trainee UBS 2026
-
-Repositório do projeto desenvolvido pelo Grupo 9 durante o processo seletivo da Jornada de Trainee UBS 2026.
+Repository for the project developed by Group 9 during the UBS Trainee Journey 2026 selection process.
 
 ---
 
-## 🚀 Como Executar o Projeto
+## 🚀 How to Run the Project
 
-### ✅ Pré-requisitos
+### ✅ Prerequisites
 
 - **Java 17+**
 - **Node.js 18+** e **npm**
@@ -17,29 +15,31 @@ Repositório do projeto desenvolvido pelo Grupo 9 durante o processo seletivo da
 
 ---
 
-## 📦 Instalação
+## 📦 Installation
 
-### 1. Clone o Repositório
+### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/seu-usuario/Jornada-Trainee-UBS-2026-Grupo-09.git
 cd Jornada-Trainee-UBS-2026-Grupo-09
 ```
 
-### 2. Configure o Banco de Dados
+### 2. Configure the Database
 
-#### Opção A: PostgreSQL Local
+#### Option A: Local PostgreSQL
+
 ```bash
-# Crie um banco de dados
+# Create a database
 createdb expense_manager
 
-# Configure as credenciais em application.properties
+# Configure credentials in application.properties
 spring.datasource.url=jdbc:postgresql://localhost:5432/expense_manager
-spring.datasource.username=seu_usuario
-spring.datasource.password=sua_senha
+spring.datasource.username=your_user
+spring.datasource.password=your_password
 ```
 
-#### Opção B: Docker
+#### Option B: Docker
+
 ```bash
 docker run --name postgres-expense \
   -e POSTGRES_DB=expense_manager \
@@ -53,148 +53,273 @@ docker-compose up -d
 
 ---
 
-## 🔧 Executar o Backend (Spring Boot)
+## 🔧 Run Backend (Spring Boot)
 
 ```bash
-# Na raiz do projeto
+# From project root
 ./mvnw spring-boot:run
 
-# Ou com Maven instalado
+# Or with Maven installed
 mvn spring-boot:run
 ```
 
-**Resultado esperado:**
+**Expected Result:**
+
 ```
 Started ExpenseManagerApplication in 5.493 seconds
 Tomcat started on port(s): 8080 (http)
 ```
 
-Backend disponível em: **http://localhost:8080**
+Backend available at: **http://localhost:8080**
 
 ---
 
-## 🎨 Executar o Frontend (React + Vite)
+## 🎨 Run Frontend (React + Vite)
 
 ```bash
-# Na raiz do projeto (ou pasta frontend se existir)
+# From project root (or frontend folder if exists)
 npm install
 npm run dev
 ```
 
-**Resultado esperado:**
+**Expected Result:**
+
 ```
 VITE v6.4.1  ready in 777 ms
 
 ➜  Local:   http://localhost:5173/
 ```
 
-Frontend disponível em: **http://localhost:5173**
+Frontend available at: **http://localhost:5173**
 
 ---
 
-## 🔌 Comunicação Frontend-Backend
+## 🔌 Frontend-Backend Communication
 
-O frontend está configurado para se comunicar com o backend através de proxy:
-- Requisições para `/api/*` são automaticamente redirecionadas para `http://localhost:8080`
-- Configuração em `vite.config.ts`
+The frontend is configured to communicate with the backend through a proxy:
+
+- Requests to `/api/*` are automatically forwarded to `http://localhost:8080`
+- Configuration in `vite.config.ts`
 
 ---
 
-## 🧪 Executar os Testes
+## 🧪 Running Tests
 
-### Testes do Backend
+### Backend Tests
+
 ```bash
 ./mvnw test
 
-# Testes específicos
+# Specific tests
 ./mvnw test -Dtest=ExpenseServiceTest
 ```
 
-**Resultado esperado:**
+**Expected Result:**
+
 ```
 Tests run: 11, Failures: 0, Errors: 0
 ```
 
 ---
 
-## 📁 Estrutura do Projeto
+## 📁 Project Structure
+
+### Complete Directory Tree
 
 ```
-.
-├── src/
-│   ├── main/
-│   │   ├── java/com/ubs/expensemanager/
-│   │   │   ├── controller/      # REST Controllers
-│   │   │   ├── service/         # Lógica de negócio
-│   │   │   ├── repository/      # Data Access Layer
-│   │   │   ├── domain/          # Entidades JPA
-│   │   │   ├── dto/             # Data Transfer Objects
-│   │   │   └── mapper/          # Mappers de entidades
-│   │   └── resources/
-│   │       ├── application.properties
-│   │       └── db/migration/    # Scripts Flyway
-│   ├── test/java/com/ubs/expensemanager/
-│   │   ├── service/             # Testes unitários
-│   │   └── integration/         # Testes de integração
-│   └── index.css, main.tsx      # Frontend React
-├── public/                       # Arquivos estáticos
-├── pom.xml                       # Dependências Maven
-├── package.json                  # Dependências npm
-├── vite.config.ts                # Configuração Vite
-├── docker-compose.yml            # Definição de containers
-└── README.md
+Jornada-Trainee-UBS-2026-Grupo-09/
+├── 📂 src/
+│   ├── 📂 main/
+│   │   ├── 📂 java/com/ubs/expensemanager/
+│   │   │   ├── 📂 controller/           # REST API Controllers
+│   │   │   ├── 📂 service/              # Business Logic
+│   │   │   ├── 📂 repository/           # Data Access Layer (JPARepository)
+│   │   │   ├── 📂 domain/               # JPA Entities
+│   │   │   │   └── 📂 enums/            # Enum classes
+│   │   │   ├── 📂 dto/                  # Data Transfer Objects
+│   │   │   │   ├── 📂 expense/
+│   │   │   │   ├── 📂 category/
+│   │   │   │   ├── 📂 auth/
+│   │   │   │   ├── 📂 alert/
+│   │   │   │   ├── 📂 department/
+│   │   │   │   ├── 📂 report/
+│   │   │   │   └── 📂 employee/
+│   │   │   ├── 📂 mapper/               # Entity Mappers
+│   │   │   ├── 📂 config/               # Spring Configuration
+│   │   │   ├── 📂 handler/              # Exception Handlers
+│   │   │   ├── 📂 exception/            # Custom Exceptions
+│   │   │   ├── 📂 security/             # Security Configuration
+│   │   │   └── ExpenseManagerApplication.java
+│   │   └── 📂 resources/
+│   │       ├── application.properties   # Spring Configuration
+│   │       └── 📂 db/migration/         # Flyway Scripts (V1..V11)
+│   │
+│   ├── 📂 app/ (Frontend - React + TypeScript)
+│   │   ├── 📂 auth/                     # Authentication
+│   │   │   ├── AuthContext.tsx
+│   │   │   ├── AuthProvider.tsx
+│   │   │   └── types.ts
+│   │   ├── 📂 components/               # React Components
+│   │   │   ├── Navbar.tsx
+│   │   │   ├── Navigation.tsx
+│   │   │   ├── Sidebar.tsx
+│   │   │   ├── 📂 figma/                # Figma Components
+│   │   │   └── 📂 ui/                   # UI Components (shadcn/ui)
+│   │   │       ├── accordion.tsx
+│   │   │       ├── alert-dialog.tsx
+│   │   │       ├── alert.tsx
+│   │   │       ├── aspect-ratio.tsx
+│   │   │       ├── avatar.tsx
+│   │   │       ├── badge.tsx
+│   │   │       ├── button.tsx
+│   │   │       ├── card.tsx
+│   │   │       ├── carousel.tsx
+│   │   │       ├── chart.tsx
+│   │   │       ├── checkbox.tsx
+│   │   │       ├── dialog.tsx
+│   │   │       ├── dropdown-menu.tsx
+│   │   │       ├── input.tsx
+│   │   │       ├── table.tsx
+│   │   │       ├── tabs.tsx
+│   │   │       ├── calendar.tsx
+│   │   │       ├── command.tsx
+│   │   │       ├── context-menu.tsx
+│   │   │       ├── collapsible.tsx
+│   │   │       └── ... (more UI components)
+│   │   ├── 📂 pages/                    # Application Pages
+│   │   │   ├── AlertsPage.tsx
+│   │   │   ├── ApprovalPage.tsx
+│   │   │   ├── EmployeesPage.tsx
+│   │   │   ├── ExpensesPage.tsx
+│   │   │   ├── LoginPage.tsx
+│   │   │   └── ReportsPage.tsx
+│   │   ├── 📂 services/                 # HTTP Services
+│   │   │   ├── alertService.ts
+│   │   │   ├── apiClient.ts
+│   │   │   ├── authService.ts
+│   │   │   ├── categoryService.ts
+│   │   │   ├── employeeService.ts
+│   │   │   └── expenseService.ts
+│   │   ├── 📂 hooks/                    # React Hooks
+│   │   │   └── useAuth.ts
+│   │   ├── 📂 layouts/                  # Layouts
+│   │   │   └── AppLayout.tsx
+│   │   ├── 📂 types/                    # TypeScript Types
+│   │   │   └── index.ts
+│   │   ├── 📂 routes/                   # Routes
+│   │   │   └── ProtectedRoute.tsx
+│   │   ├── 📂 styles/                   # CSS/Tailwind
+│   │   │   ├── fonts.css
+│   │   │   ├── tailwind.css
+│   │   │   └── theme.css
+│   │   ├── 📂 lib/                      # Utilities
+│   │   │   └── date.ts
+│   │   ├── 📂 assets/                   # Images and Assets
+│   │   ├── App.tsx                      # Root Component
+│   │   ├── main.tsx                     # React Entry Point
+│   │   ├── index.css                    # Global Styles
+│   │   └── translations.ts              # i18n Translations
+│   │
+│   └── 📂 test/
+│       └── 📂 java/com/ubs/expensemanager/
+│           ├── 📂 service/              # Unit Tests
+│           └── 📂 integration/          # Integration Tests
+│
+├── 📂 dist/                         # Frontend Build Output
+├── 📂 target/                       # Backend Build Output
+├── 📂 public/                       # Static Files
+├── 📂 receipts/                     # Expense Receipts
+├── 📂 .mvn/                         # Maven Wrapper
+├── 📄 pom.xml                       # Maven Dependencies (Backend)
+├── 📄 package.json                  # npm Dependencies (Frontend)
+├── 📄 package-lock.json
+├── 📄 tsconfig.json                 # TypeScript Configuration
+├── 📄 tsconfig.app.json
+├── 📄 tsconfig.node.json
+├── 📄 vite.config.ts                # Vite Configuration
+├── 📄 tailwind.config.ts            # TailwindCSS Configuration
+├── 📄 postcss.config.js             # PostCSS Configuration
+├── 📄 eslint.config.js              # ESLint Configuration
+├── 📄 components.json               # shadcn/ui Configuration
+├── 📄 docker-compose.yml            # Docker Compose
+├── 📄 mvnw                          # Maven Wrapper (macOS/Linux)
+├── 📄 mvnw.cmd                      # Maven Wrapper (Windows)
+├── 📄 index.html                    # React HTML Root
+├── 📄 README.md                     # Project Documentation
+└── 📄 LICENSE                       # MIT License
+```
+
+### Layered Architecture
+
+#### Backend (Java - Spring Boot)
+
+```
+controller/ → service/ → repository/ → domain/
+     ↓            ↓           ↓
+   HTTP       Business     Database
+   API        Logic        Access
+```
+
+#### Frontend (React - TypeScript)
+
+```
+pages/ → components/ → services/ → types/
+  ↓         ↓            ↓
+UI/UX   Components   API HTTP   Types
 ```
 
 ---
 
-## 🔌 API Endpoints Principais
+## 🔌 Main API Endpoints
 
-| Método | Endpoint | Descrição |
-|--------|----------|-----------|
-| `GET` | `/api/expenses` | Listar todas as despesas |
-| `POST` | `/api/expenses` | Criar nova despesa |
-| `GET` | `/api/expenses/{id}` | Obter despesa por ID |
-| `PATCH` | `/api/expenses/{id}` | Atualizar despesa |
-| `DELETE` | `/api/expenses/{id}` | Deletar despesa |
-| `GET` | `/api/expenses/{id}/download` | Baixar recibo |
-| `GET` | `/api/categories` | Listar categorias |
-| `GET` | `/api/departments` | Listar departamentos |
-| `GET` | `/api/employees` | Listar funcionários |
-| `GET` | `/api/alerts` | Listar alertas |
+| Method   | Endpoint                      | Description        |
+| -------- | ----------------------------- | ------------------ |
+| `GET`    | `/api/expenses`               | List all expenses  |
+| `POST`   | `/api/expenses`               | Create new expense |
+| `GET`    | `/api/expenses/{id}`          | Get expense by ID  |
+| `PATCH`  | `/api/expenses/{id}`          | Update expense     |
+| `DELETE` | `/api/expenses/{id}`          | Delete expense     |
+| `GET`    | `/api/expenses/{id}/download` | Download receipt   |
+| `GET`    | `/api/categories`             | List categories    |
+| `GET`    | `/api/departments`            | List departments   |
+| `GET`    | `/api/employees`              | List employees     |
+| `GET`    | `/api/alerts`                 | List alerts        |
 
 ---
 
-## 🛠️ Tecnologias Utilizadas
+## 🛠️ Technologies Used
 
 ### Backend
-- **Spring Boot 3.5.9** - Framework web
-- **Spring Data JPA** - Acesso a dados ORM
-- **PostgreSQL 16.11** - Banco de dados relacional
-- **Flyway** - Versionamento de schema do BD
-- **Lombok** - Redução de boilerplate
-- **JUnit 5** - Framework de testes
-- **Mockito** - Mocks para testes
-- **Testcontainers** - Containers para testes de integração
+
+- **Spring Boot 3.5.9** - Web framework
+- **Spring Data JPA** - ORM data access
+- **PostgreSQL 16.11** - Relational database
+- **Flyway** - Database schema versioning
+- **Lombok** - Boilerplate reduction
+- **JUnit 5** - Testing framework
+- **Mockito** - Mocking for tests
+- **Testcontainers** - Containers for integration tests
 
 ### Frontend
-- **React 18+** - Biblioteca de UI
-- **Vite 6.4.1** - Build tool e dev server
-- **TypeScript** - Tipagem estática
-- **TailwindCSS** - Estilização CSS
+
+- **React 18+** - UI library
+- **Vite 6.4.1** - Build tool and dev server
+- **TypeScript** - Static typing
+- **TailwindCSS** - CSS styling
 - **Axios** - HTTP client
-- **React Router** - Roteamento
+- **React Router** - Routing
 
 ---
 
-## 🔐 Variáveis de Ambiente
+## 🔐 Environment Variables
 
-Crie um arquivo `.env` na raiz do projeto (opcional):
+Create an `.env` file in the project root (optional):
 
 ```env
 # Backend - Database
 SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/expense_manager
 SPRING_DATASOURCE_USERNAME=postgres
-SPRING_DATASOURCE_PASSWORD=sua_senha
+SPRING_DATASOURCE_PASSWORD=your_password
 SPRING_JPA_HIBERNATE_DDL_AUTO=validate
 SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.PostgreSQLDialect
 
@@ -204,31 +329,35 @@ VITE_API_URL=http://localhost:8080
 
 ---
 
-## ✨ Features Principais
+## ✨ Main Features
 
-- ✅ Gerenciamento completo de despesas
-- ✅ Categorização de gastos
-- ✅ Controle orçamentário por departamento
-- ✅ Alertas automáticos para limite de despesas
-- ✅ Upload e armazenamento de recibos (PDF, imagens)
-- ✅ Validação de regras de negócio
-- ✅ Dashboard de relatórios
-- ✅ Autenticação e autorização
-- ✅ Testes unitários e de integração
-- ✅ API RESTful documentada
+- ✅ Complete expense management
+- ✅ Expense categorization
+- ✅ Budget control by department
+- ✅ Automatic alerts for expense limits
+- ✅ Receipt upload and storage (PDF, images)
+- ✅ Business rule validation
+- ✅ Reports dashboard
+- ✅ Authentication and authorization
+- ✅ Unit and integration tests
+- ✅ Documented RESTful API
 
 ---
 
 ## 🐛 Troubleshooting
 
-### Erro: "psql: command not found"
-PostgreSQL não está instalado. Use Docker:
+### Error: "psql: command not found"
+
+PostgreSQL is not installed. Use Docker:
+
 ```bash
 docker-compose up -d postgres
 ```
 
-### Erro: "Port 8080 is already in use"
-Outra aplicação está usando a porta:
+### Error: "Port 8080 is already in use"
+
+Another application is using the port:
+
 ```bash
 # macOS/Linux
 lsof -i :8080
@@ -239,8 +368,10 @@ netstat -ano | findstr :8080
 taskkill /PID <PID> /F
 ```
 
-### Erro: "Cannot find module '@babel/helper-validator-identifier'"
-Limpe o cache npm:
+### Error: "Cannot find module '@babel/helper-validator-identifier'"
+
+Clean npm cache:
+
 ```bash
 cd frontend
 rm -rf node_modules package-lock.json
@@ -248,8 +379,10 @@ npm cache clean --force
 npm install
 ```
 
-### Frontend não conecta ao backend
-Verifique se ambos os servidores estão rodando:
+### Frontend cannot connect to backend
+
+Check if both servers are running:
+
 ```bash
 # Backend: http://localhost:8080/api/health
 # Frontend: http://localhost:5173
@@ -257,48 +390,51 @@ Verifique se ambos os servidores estão rodando:
 
 ---
 
-## 📊 Compilação e Build
+## 📊 Compilation and Build
 
-### Build do Backend
+### Backend Build
+
 ```bash
 ./mvnw clean package -DskipTests
-# Jar gerado: target/expensemanager-0.0.1-SNAPSHOT.jar
+# Generated JAR: target/expensemanager-0.0.1-SNAPSHOT.jar
 ```
 
-### Build do Frontend
+### Frontend Build
+
 ```bash
 npm run build
-# Arquivos gerados em: dist/
+# Generated files: dist/
 ```
 
 ---
 
-## 🤝 Contribuindo
+## 🤝 Contributing
 
-1. Crie uma branch para sua feature: `git checkout -b feature/AmazingFeature`
-2. Commit suas mudanças: `git commit -m "Add some AmazingFeature"`
-3. Push para a branch: `git push origin feature/AmazingFeature`
-4. Abra um Pull Request
+1. Create a branch for your feature: `git checkout -b feature/AmazingFeature`
+2. Commit your changes: `git commit -m "Add some AmazingFeature"`
+3. Push to the branch: `git push origin feature/AmazingFeature`
+4. Open a Pull Request
 
-### Antes de fazer commit:
+### Before committing:
+
 ```bash
-# Compile e teste
+# Compile and test
 ./mvnw clean test
 
-# Verifique erros de lint
+# Check lint errors
 npm run lint
 ```
 
 ---
 
-## 📄 Licença
+## 📄 License
 
-Este projeto está sob licença MIT. Veja o arquivo [LICENSE](LICENSE) para detalhes.
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
 ---
 
-## 👥 Grupo 09 - Jornada Trainee UBS 2026
+## 👥 Group 09 - UBS Trainee Journey 2026
 
-Desenvolvido pelo Grupo 9
+Developed by Group 9
 
-**Última atualização**: 13 de janeiro de 2026
+**Last update**: January 14, 2026
