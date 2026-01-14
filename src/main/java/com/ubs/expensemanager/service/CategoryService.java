@@ -17,12 +17,12 @@ import com.ubs.expensemanager.repository.CategoryRepository;
 public class CategoryService {
     private final CategoryRepository repository;
 
-    public CategoryService(CategoryRepository repository){
+    public CategoryService(CategoryRepository repository) {
         this.repository = repository;
     }
 
     @Transactional
-    public Category createCategory (CreateCategoryRequest request){
+    public Category createCategory (CreateCategoryRequest request) {
         Category category = new Category();
 
         category.setName(request.name());
@@ -33,12 +33,12 @@ public class CategoryService {
         return repository.save(category);
     }
 
-    public List<Category> findAll(){
+    public List<Category> findAll() {
         return repository.findAll();
     }
 
     @Transactional
-    public Category updateCategory (UUID id, UpdateCategoryRequest request){
+    public Category updateCategory(UUID id, UpdateCategoryRequest request) {
         Category category = findById(id);
 
         if (request.name() != null){
@@ -55,12 +55,13 @@ public class CategoryService {
 
     }
 
-    public Category findById(UUID id){
+    public Category findById(UUID id) {
         return repository.findById(id)
         .orElseThrow(() -> new NoSuchElementException("Category" + id + "not found"));
     }
 
-    private boolean validateCategory (Category category){
+    private boolean validateCategory(Category category) {
+
     	if (category.getDailyLimit() == null || category.getMonthlyLimit() == null) {
             throw new IllegalArgumentException("Limits must be provided");
         }
@@ -74,7 +75,4 @@ public class CategoryService {
 
         return true;
     }
-
-   
-    
 }
