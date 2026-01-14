@@ -58,5 +58,19 @@ public interface ExpenseRepository extends JpaRepository<Expense, UUID> {
         @Param("status") com.ubs.expensemanager.domain.enums.ExpenseStatus status
     );
 
+    @Query("""
+    SELECT e
+    FROM Expense e
+    JOIN FETCH e.employee emp
+    LEFT JOIN FETCH emp.department dept
+    JOIN FETCH e.category cat
+    WHERE e.date BETWEEN :start AND :end
+    ORDER BY e.date DESC
+""")
+    List<Expense> findAllBetweenDates(
+        @Param("start") LocalDate start,
+        @Param("end") LocalDate end
+    );
+
     boolean existsByEmployee_Id(UUID employeeId);
 }
