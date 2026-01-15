@@ -1,6 +1,7 @@
 package com.ubs.expensemanager.service;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
@@ -211,6 +212,76 @@ public class ExpenseService {
     public org.springframework.core.io.Resource loadReceipt(UUID expenseId) {
         Expense expense = findById(expenseId);
         return receiptStorageService.loadAsResource(expense.getReceiptFilename());
+    }
+
+    /**
+     * Approve an expense as Manager.
+     * Preconditions:
+     *  - expense must be in PENDING
+     * Postconditions:
+     *  - status becomes APPROVED_MANAGER
+     *  - approvedBy/approvedAt set
+     */
+    @Transactional
+    public Expense approveByManager(UUID expenseId, UUID managerId) {
+        Expense expense = findById(expenseId);
+
+        if (expense.getStatus() != ExpenseStatus.PENDING) {
+            throw new BusinessException("Expense is not pending and cannot be approved by manager");
+        }
+
+        // mark approved by manager
+        expense.setStatus(ExpenseStatus.APPROVED_MANAGER);
+
+
+        return expenseRepository.save(expense);
+    }
+
+    /**
+     * Approve an expense as Finance.
+     * Preconditions:
+     *  - expense must be in APPROVED_MANAGER
+     * Postconditions:
+     *  - status becomes APPROVED_FINANCE
+     *  - approvedBy/approvedAt set (overwrites prior approver info with finance approver)
+     *  - clear needsReview flag (optional)
+     */
+    @Transactional
+    public Expense approveByFinance(UUID expenseId, UUID financeId) {
+        Expense expense = findById(expenseId);
+
+        if (expense.getStatus() != ExpenseStatus.APPROVED_MANAGER) {
+            throw new BusinessException("Expense was not approved by manager and cannot be approved by finance");
+        }
+
+        expense.setStatus(ExpenseStatus.APPROVED_FINANCE);
+        expense.setNeedsReview(false);
+
+        return expenseRepository.save(expense);
+    }
+
+    /**
+     * Reject an expense (manager or finance).
+     * Preconditions:
+     *  - expense must not be in final approved state
+     * Postconditions:
+     *  - status becomes REJECTED
+     *  - rejectionReason is stored
+     *  - approvedBy/approvedAt set to the rejecting user
+     */
+    @Transactional
+    public Expense rejectExpense(UUID expenseId, UUID userId, String reason) {
+        Expense expense = findById(expenseId);
+
+        if (expense.getStatus() == ExpenseStatus.APPROVED_FINANCE) {
+            throw new BusinessException("Finalized expense cannot be rejected");
+        }
+
+        expense.setStatus(ExpenseStatus.REJECTED);
+        expense.setNeedsReview(false);
+
+
+        return expenseRepository.save(expense);
     }
 
 }

@@ -16,6 +16,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import com.ubs.expensemanager.service.ExpenseService;
 import com.ubs.expensemanager.domain.Expense;
@@ -23,6 +25,7 @@ import com.ubs.expensemanager.dto.expense.CreateExpenseRequest;
 import com.ubs.expensemanager.dto.expense.ExpenseResponse;
 import com.ubs.expensemanager.dto.expense.UpdateExpenseRequest;
 import com.ubs.expensemanager.mapper.ExpenseMapper;
+import com.ubs.expensemanager.exception.BusinessException;
 
 @RestController
 @RequestMapping("/expense")
@@ -83,5 +86,50 @@ public class ExpenseController {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .body(resource);
+    }
+    @PostMapping("/{id}/approve/manager")
+    @PreAuthorize("hasRole('MANAGER')")
+    public ExpenseResponse approveByManager(@PathVariable UUID id, Authentication auth) {
+        UUID managerId = extractUserId(auth);
+        Expense updated = service.approveByManager(id, managerId);
+        return mapper.toResponse(updated);
+    }
+
+    @PostMapping("/{id}/approve/finance")
+    @PreAuthorize("hasRole('FINANCE')")
+    public ExpenseResponse approveByFinance(@PathVariable UUID id, Authentication auth) {
+        UUID financeId = extractUserId(auth);
+        Expense updated = service.approveByFinance(id, financeId);
+        return mapper.toResponse(updated);
+    }
+
+    public static record RejectRequest(String reason) {}
+
+    @PostMapping("/{id}/reject")
+    @PreAuthorize("hasAnyRole('MANAGER','FINANCE')")
+    public ExpenseResponse reject(@PathVariable UUID id, @RequestBody RejectRequest body, Authentication auth) {
+        UUID userId = extractUserId(auth);
+        Expense updated = service.rejectExpense(id, userId, body == null ? null : body.reason());
+        return mapper.toResponse(updated);
+    }
+
+    /**
+     * Tries to extract a UUID user id from Authentication#getName().
+     * If your authentication stores the user id elsewhere (e.g. as a claim or principal),
+     * adjust this method accordingly.
+     */
+    private UUID extractUserId(Authentication auth) {
+        if (auth == null || auth.getName() == null) {
+            throw new BusinessException("Unauthenticated request");
+        }
+
+        String name = auth.getName();
+        try {
+            return UUID.fromString(name);
+        } catch (IllegalArgumentException ex) {
+            // If your principal is not a UUID, try other strategies here (e.g. cast principal to custom UserDetails)
+            // For now, be explicit so you quickly notice and update.
+            throw new BusinessException("Cannot extract user id from authentication; expected UUID in auth.getName()");
+        }
     }
 }
