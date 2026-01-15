@@ -1,4 +1,4 @@
-Readme:# 📋 Expense Manager - UBS Trainee Journey 2026
+📋 Expense Manager - UBS Trainee Journey 2026
 
 Repository for the project developed by Group 9 during the UBS Trainee Journey 2026 selection process.
 
@@ -408,9 +408,9 @@ npm run build
 
 ---
 
-## Demonstração da aplicação
+## Application Demo
 
-- Link para assistir à demo no Youtube: https://youtu.be/T0Ad2To4FhQ
+- Link to watch the demo on Youtube: https://youtu.be/T0Ad2To4FhQ
 
 ---
 
