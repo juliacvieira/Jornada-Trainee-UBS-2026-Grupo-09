@@ -117,7 +117,7 @@ The frontend is configured to communicate with the backend through a proxy:
 **Expected Result:**
 
 ```
-Tests run: 11, Failures: 0, Errors: 0
+Tests run: 48, Failures: 0, Errors: 0, Skipped: 0
 ```
 
 ---
