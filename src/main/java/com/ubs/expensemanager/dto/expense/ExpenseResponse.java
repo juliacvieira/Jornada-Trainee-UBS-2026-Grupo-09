@@ -1,0 +1,22 @@
+package com.ubs.expensemanager.dto.expense;
+
+import java.util.UUID;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import com.ubs.expensemanager.domain.enums.ExpenseStatus;
+
+public record ExpenseResponse(
+		UUID id,
+		UUID employeeId,
+		String employeeName,
+		UUID categoryId,
+		String categoryName,
+		BigDecimal amount,
+		String currency,
+		LocalDate date,
+		String description,
+		ExpenseStatus status,
+		boolean needsReview,
+		String receiptUrl,
+		String receiptFilename
+) {}
