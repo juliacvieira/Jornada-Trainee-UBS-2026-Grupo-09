@@ -5,7 +5,7 @@ import { AuthContext } from "../auth/AuthContext";
 
 interface Props {
   children: React.ReactNode;
-  allowedRoles?: Array<"EMPLOYEE" | "MANAGER" | "FINANCE">;
+  allowedRoles?: Array<"employee" | "manager" | "finance">;
 }
 
 /**
