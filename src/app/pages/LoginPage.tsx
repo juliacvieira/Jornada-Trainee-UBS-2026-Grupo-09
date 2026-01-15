@@ -1,7 +1,7 @@
 import React, { useState, useContext } from "react";
 import { AuthContext } from "../auth/AuthContext";
 
-export default function LoginPage() {
+export function LoginPage() {
   const auth = useContext(AuthContext);
   if (!auth) throw new Error("AuthContext not found");
   const { login, loading } = auth;

@@ -52,9 +52,9 @@ export default function App() {
           </ProtectedRoute>
         }
       >
-        <Route index element={<Navigate to="expenses" replace />} />
+        <Route index element={<Navigate to="/expenses" replace />} />
 
-        <Route path="expenses" element={<ExpensesPage t={t} language={language} />} />
+        <Route path="/expenses" element={<ExpensesPage t={t} language={language} />} />
 
         <Route
           path="employees"

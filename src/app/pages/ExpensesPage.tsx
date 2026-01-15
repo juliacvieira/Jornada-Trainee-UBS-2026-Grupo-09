@@ -191,7 +191,7 @@ export function ExpensesPage({ t, language }: ExpensesPageProps) {
 
       // If the browser supports the File System Access API, let the user pick a directory
       if ('showDirectoryPicker' in window) {
-        // @ts-ignore - experimental API
+        //@ts-ignore - experimental API
         const dirHandle = await (window as any).showDirectoryPicker();
         const fileHandle = await dirHandle.getFileHandle(filename, { create: true });
         const writable = await fileHandle.createWritable();

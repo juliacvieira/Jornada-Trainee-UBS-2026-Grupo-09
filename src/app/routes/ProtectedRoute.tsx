@@ -14,7 +14,7 @@ interface Props {
  *   <ManagerPage />
  * </ProtectedRoute>
  */
-export default function ProtectedRoute({ children, allowedRoles }: Props) {
+export function ProtectedRoute({ children, allowedRoles }: Props) {
   const auth = useContext(AuthContext);
   if (!auth) throw new Error("AuthContext not found");
   const { user } = auth;

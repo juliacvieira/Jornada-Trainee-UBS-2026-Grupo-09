@@ -8,7 +8,7 @@ export interface LoginResponse {
 
 export async function loginRequest(email: string, password: string): Promise<LoginResponse> {
   // ajuste o path conforme backend: aqui assumimos API_BASE + "/auth/login"
-  return apiFetch<LoginResponse>("/auth/login", {
+  return apiFetch<LoginResponse>("/api/auth/login", {
     method: "POST",
     body: JSON.stringify({ email, password }),
   });

@@ -15,8 +15,8 @@ interface NavigationProps {
 }
 
 const pagesByRole: Record<UserRole, Page[]> = {
-  EMPLOYEE: ["expenses"],
-  MANAGER: ["expenses", "employees", "approval"],
+  employee: ["expenses"],
+  manager: ["expenses", "employees", "approval"],
   FINANCE: ["expenses", "approval", "alerts", "reports"],
 };
 
@@ -24,7 +24,7 @@ export function Navigation({ labels }: NavigationProps) {
   const { user } = useAuth();
 
   if (!user) return null;
-  if (user.role === "EMPLOYEE") return null;
+  if (user.role === "employee") return null;
 
   const allowedPages = pagesByRole[user.role];
 
