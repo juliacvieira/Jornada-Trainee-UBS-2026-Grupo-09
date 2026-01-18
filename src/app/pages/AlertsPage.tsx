@@ -112,8 +112,10 @@ const mockResolvedAlerts: Alert[] = [
 
 export function AlertsPage({ t, language }: AlertsPageProps) {
   const { user } = useAuth();
-  const [activeAlerts] = useState<Alert[]>(mockActiveAlerts);
-  const [resolvedAlerts] = useState<Alert[]>(mockResolvedAlerts);
+  // const [activeAlerts] = useState<Alert[]>(mockActiveAlerts);
+  // const [resolvedAlerts] = useState<Alert[]>(mockResolvedAlerts);
+  const [activeAlerts, setActiveAlerts] = useState<Alert[]>(mockActiveAlerts);
+  const [resolvedAlerts, setResolvedAlerts] = useState<Alert[]>(mockResolvedAlerts);
   const [activeSearch, setActiveSearch] = useState('');
   const [resolvedSearch, setResolvedSearch] = useState('');
   const [selectedAlert, setSelectedAlert] = useState<Alert | null>(null);
@@ -154,11 +156,36 @@ export function AlertsPage({ t, language }: AlertsPageProps) {
     setResolveNote('');
   };
 
+  // const handleConfirmResolve = () => {
+  //   // Handle alert resolution
+  //   setSelectedAlert(null);
+  //   setResolveNote('');
+  // };
+
   const handleConfirmResolve = () => {
-    // Handle alert resolution
+    if (!selectedAlert || !user) return;
+
+    const resolvedAlert: Alert = {
+      ...selectedAlert,
+      status: 'resolved',
+      resolvedBy: user.email,
+      resolvedAt: new Date().toISOString(),
+      resolveNote: resolveNote.trim(),
+    };
+
+    // Remove da lista de ativos
+    setActiveAlerts(prev =>
+      prev.filter(alert => alert.id !== selectedAlert.id)
+    );
+
+    // Adiciona no topo da lista de resolvidos
+    setResolvedAlerts(prev => [resolvedAlert, ...prev]);
+
+    // Limpa estado do modal
     setSelectedAlert(null);
     setResolveNote('');
   };
+
 
   const handleCancelResolve = () => {
     setSelectedAlert(null);

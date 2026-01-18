@@ -99,8 +99,10 @@ const mockRejectedExpenses: Expense[] = [
 export function ApprovalPage({ t, language }: ApprovalPageProps) {
   const { user } = useAuth();
   const [pendingExpenses, setPendingExpenses] = useState<Expense[]>(mockPendingExpenses);
-  const [approvedExpenses] = useState<Expense[]>(mockApprovedExpenses);
-  const [rejectedExpenses] = useState<Expense[]>(mockRejectedExpenses);
+  // const [approvedExpenses] = useState<Expense[]>(mockApprovedExpenses);
+  // const [rejectedExpenses] = useState<Expense[]>(mockRejectedExpenses);
+  const [approvedExpenses, setApprovedExpenses] = useState<Expense[]>(mockApprovedExpenses);
+  const [rejectedExpenses, setRejectedExpenses] = useState<Expense[]>(mockRejectedExpenses);
 
   useEffect(() => {
     const onCanceled = (e: Event) => {
@@ -137,8 +139,42 @@ export function ApprovalPage({ t, language }: ApprovalPageProps) {
     setRejectionReason('');
   };
 
+  // const handleConfirmAction = () => {
+  //   // Handle approval/rejection
+  //   setSelectedExpense(null);
+  //   setActionType(null);
+  //   setRejectionReason('');
+  // };
+
   const handleConfirmAction = () => {
-    // Handle approval/rejection
+    if (!selectedExpense || !actionType || !user) return;
+
+    // cria nova versão da despesa
+    const updatedExpense: Expense = {
+      ...selectedExpense,
+      status: actionType === 'approve'
+        ? (user.role === 'FINANCE' ? 'financeApproved' : 'managerApproved')
+        : 'rejected',
+    };
+
+    // remove da lista de pendentes
+    setPendingExpenses(prev =>
+      prev.filter(exp => exp.id !== selectedExpense.id)
+    );
+
+    // adiciona ao histórico correto
+    if (actionType === 'approve') {
+      setApprovedExpenses(prev => [updatedExpense, ...prev]);
+    } else {
+      setRejectedExpenses(prev => [updatedExpense, ...prev]);
+    }
+
+    // remove seleção (checkbox)
+    setSelectedPendingIds(prev =>
+      prev.filter(id => id !== selectedExpense.id)
+    );
+
+    // limpa modal
     setSelectedExpense(null);
     setActionType(null);
     setRejectionReason('');
@@ -154,11 +190,11 @@ export function ApprovalPage({ t, language }: ApprovalPageProps) {
     const all = [...pendingExpenses, ...approvedExpenses, ...rejectedExpenses];
     const expense = all.find(e => e.id === expenseId);
     if (!expense || !expense.receipt) {
-      alert('Comprovante não encontrado.');
+      alert('Receipt not found.');
       return;
     }
     setSelectedReceiptUrl(expense.receipt);
-    setSelectedReceiptName(`comprovante-${expense.id}`);
+    setSelectedReceiptName(`receipt-${expense.id}`);
   };
 
   const handleToggleSelectPending = (id: string) => {
@@ -175,7 +211,7 @@ export function ApprovalPage({ t, language }: ApprovalPageProps) {
 
   const handleDownloadMultipleReceipts = (ids: string[]) => {
     console.log('Downloading receipts for:', ids);
-    alert(`Baixando ${ids.length} comprovante(s)...`);
+    alert(`Downloading ${ids.length} receipt(s)...`);
   };
 
   // Filter functions
