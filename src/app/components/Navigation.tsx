@@ -16,8 +16,8 @@ interface NavigationProps {
 
 const pagesByRole: Record<UserRole, Page[]> = {
   employee: ["expenses"],
-  manager: ["expenses", "employees", "approval"],
-  FINANCE: ["expenses", "approval", "alerts", "reports"],
+  manager: ["expenses", "employees", "approval", "alerts"],
+  finance: ["expenses", "approval", "alerts", "reports"],
 };
 
 export function Navigation({ labels }: NavigationProps) {

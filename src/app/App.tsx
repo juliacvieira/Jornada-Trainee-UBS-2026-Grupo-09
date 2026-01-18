@@ -77,7 +77,7 @@ export default function App() {
         <Route
           path="/alerts"
           element={
-            <ProtectedRoute allowedRoles={["finance"]}>
+            <ProtectedRoute allowedRoles={["finance", "manager"]}>
               <AlertsPage t={t} language={language} />
             </ProtectedRoute>
           }
